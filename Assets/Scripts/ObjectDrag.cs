@@ -16,4 +16,13 @@ public class ObjectDrag : MonoBehaviour
         Vector3 pos = BuildingSystem.GetMouseWorldPosition() + offset;
         transform.position = BuildingSystem.current.SnapCoordinationToGrid(pos);
     }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))  
+        {
+            Vector3 pos = BuildingSystem.GetMouseWorldPosition();
+            transform.position = BuildingSystem.current.SnapCoordinationToGrid(pos);
+        }
+    }
 }

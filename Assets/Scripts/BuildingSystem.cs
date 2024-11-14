@@ -14,8 +14,11 @@ public class BuildingSystem : MonoBehaviour
 
     public GameObject prefab1;
     public GameObject prefab2;
-
+    private GameObject selectedObject;
     private PlaceableObject objectToPlace;
+
+    private float doubleClickTime = 0.3f;  
+    private float lastClickTime = 0f;
 
     #region Unity Methods
 
@@ -29,6 +32,15 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (Time.time - lastClickTime < doubleClickTime)
+            {
+                SelectObject();
+            }
+            lastClickTime = Time.time;
+        }
+
         if (Input.GetKeyDown(KeyCode.A))
         {
             InitializeWithObject(prefab1);
@@ -61,17 +73,17 @@ public class BuildingSystem : MonoBehaviour
                 Destroy(objectToPlace.gameObject);
             }
         }
-        else if (Input.GetKeyDown(KeyCode.Escape))
+        else if (Input.GetKeyDown(KeyCode.Backspace))
         {
             Destroy(objectToPlace.gameObject);
         }
     }
 
-        #endregion
+    #endregion
 
-        #region Utils
+    #region Utils
 
-        public static Vector3 GetMouseWorldPosition()
+    public static Vector3 GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
@@ -114,10 +126,27 @@ public class BuildingSystem : MonoBehaviour
     public void InitializeWithObject(GameObject prefab)
     {
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
-
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
+    }
+
+    private void SelectObject()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            selectedObject = hit.collider.gameObject;
+            objectToPlace = selectedObject.GetComponent<PlaceableObject>();
+            Debug.Log(selectedObject);
+            selectedObject.AddComponent<ObjectDrag>();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            UnfillArea(start, objectToPlace.Size);
+        }
+
+        
     }
 
     private bool CanBePlaced(PlaceableObject placeableObject)
@@ -138,10 +167,40 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
+    public void rotateObject()
+    {
+        objectToPlace.Rotate();
+    }
+
+    public void placeObject()
+    {
+        if (CanBePlaced(objectToPlace))
+        {
+            objectToPlace.Place();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            TakeArea(start, objectToPlace.Size);
+        }
+        else
+        {
+            Destroy(objectToPlace.gameObject);
+        }
+    }
+
+    public void deleteObject()
+    {
+        Destroy(objectToPlace.gameObject);
+    }
+
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
 
+    public void UnfillArea(Vector3Int start, Vector3Int size)
+    {
+        MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+
     #endregion
+
 }
