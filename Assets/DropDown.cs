@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShowHideScript : MonoBehaviour
+public class DropDownScript : MonoBehaviour
 {
     [SerializeField] private GameObject hideButton;
     [SerializeField] private GameObject showIcon;

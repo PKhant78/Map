@@ -1,7 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SearchService;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class BuildingSystem : MonoBehaviour
 {
@@ -14,6 +18,9 @@ public class BuildingSystem : MonoBehaviour
 
     public GameObject prefab1;
     public GameObject prefab2;
+
+    public GameObject Selected; // Line added by Bryan
+
 
     private PlaceableObject objectToPlace;
 
@@ -110,6 +117,50 @@ public class BuildingSystem : MonoBehaviour
     #endregion
 
     #region Building Placement
+    // Lines added by Bryan
+    public void RotateSelected()
+    {
+        if (Selected) objectToPlace.Rotate();
+    }
+
+    public void DestroySelected()
+    {
+        if (Selected)
+        {
+            Destroy(objectToPlace.gameObject);
+            Selected = null;
+            unhighlightButtons();
+        }
+    }
+
+    public void PlaceSelected()
+    {
+        if (Selected)
+        {
+            if (CanBePlaced(objectToPlace))
+            {
+                objectToPlace.Place();
+                Selected = null;
+                unhighlightButtons();
+                Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                TakeArea(start, objectToPlace.Size);
+            }
+        }
+    }
+
+    private void unhighlightButtons()
+    {
+        GameObject content = GameObject.Find("Content");
+        GameObject objectSelection = GameObject.Find("ObjectPlacement");
+        GameObject objectScale = GameObject.Find("ObjectScale");
+        objectSelection.transform.localPosition = new Vector3(1060, 0, 0);
+        objectScale.transform.localPosition = new Vector3(-1360, -350, 0);
+        foreach (Transform child in content.transform)
+        {
+            UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
+            btn.GetComponent<UnityEngine.UI.Image>().color = new Color(0, 64f / 255f, 128f / 255f);
+        }
+    }
 
     public void InitializeWithObject(GameObject prefab)
     {
@@ -118,8 +169,11 @@ public class BuildingSystem : MonoBehaviour
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
-    }
 
+        // Lines added by Bryan
+        Selected = obj;
+        unhighlightButtons();
+    }
     private bool CanBePlaced(PlaceableObject placeableObject)
     {
         BoundsInt area = new BoundsInt();
