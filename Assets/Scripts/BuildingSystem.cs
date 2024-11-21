@@ -21,6 +21,7 @@ public class BuildingSystem : MonoBehaviour
 
     public GameObject Selected; // Line added by Bryan
 
+    public enum size { small, medium, large}
 
     private PlaceableObject objectToPlace;
 
@@ -53,6 +54,11 @@ public class BuildingSystem : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             objectToPlace.Rotate();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            changeSize(size.large);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -197,6 +203,25 @@ public class BuildingSystem : MonoBehaviour
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+
+    public void changeSize(size s)
+    {
+        GameObject obj = Selected;
+        switch (s)
+        {
+            case size.small:
+                obj.transform.localScale = new Vector3(1f, 1f, 1f);
+                break;
+            case size.medium:
+                obj.transform.localScale = new Vector3(3f, 3f, 3f);
+                break;
+            case size.large:
+                obj.transform.localScale = new Vector3(5f, 5f, 5f);
+                break;
+            default:
+                break;
+        }
     }
 
     #endregion
