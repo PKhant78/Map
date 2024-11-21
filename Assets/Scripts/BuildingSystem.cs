@@ -153,8 +153,10 @@ public class BuildingSystem : MonoBehaviour
         GameObject content = GameObject.Find("Content");
         GameObject objectSelection = GameObject.Find("ObjectPlacement");
         GameObject objectScale = GameObject.Find("ObjectScale");
+        GameObject saveLoad = GameObject.Find("SaveLoad");
         objectSelection.transform.localPosition = new Vector3(1060, 0, 0);
         objectScale.transform.localPosition = new Vector3(-1360, -350, 0);
+        saveLoad.transform.localPosition = new Vector3(960, -540, 0);
         foreach (Transform child in content.transform)
         {
             UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();

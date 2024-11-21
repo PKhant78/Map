@@ -3493,6 +3493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0d7d263f1c1c4143a19be57f4496aee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveLoad: {fileID: 2083462350}
   content: {fileID: 1212588355}
   objectPlacement: {fileID: 1635647503}
   objectScale: {fileID: 2033930211}
