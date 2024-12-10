@@ -5,17 +5,18 @@ using UnityEngine.Tilemaps;
 
 public class SaveHandler : MonoBehaviour
 {
-   Dictionary<string, Tilemap> tilemaps = new Dictionary<string, Tilemap>();
+    Dictionary<string, Tilemap> tilemaps = new Dictionary<string, Tilemap>();
     Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 
 
     [SerializeField] BoundsInt bounds;
     [SerializeField] string filename = "tilemapData.json";
 
+    public OpenFile openFile;
+
     private void Start()
     {
         initTilemaps();
-        initObjects();
     }
 
     private void initTilemaps()
@@ -40,6 +41,8 @@ public class SaveHandler : MonoBehaviour
 
     public void onSave()
     {
+        initObjects();
+        /*
         List<TilemapData> data = new List<TilemapData>();
 
         foreach (var mapObj in tilemaps)
@@ -65,7 +68,7 @@ public class SaveHandler : MonoBehaviour
             data.Add(mapData);
         }
 
-        FileHandler.SaveToJSON<TilemapData>(data, filename);
+        FileHandler.SaveToJSON<TilemapData>(data, filename);*/
 
         // save objects
         List<GameObjectData> objectData = new List<GameObjectData>();
@@ -81,7 +84,10 @@ public class SaveHandler : MonoBehaviour
 
     public void onLoad()
     {
-        List<TilemapData> data = FileHandler.ReadListFromJSON<TilemapData>(filename);
+        DestroyObjects();
+        //List<TilemapData> data = FileHandler.ReadListFromJSON<TilemapData>(openFile.loadPath());
+
+        /*
 
         foreach(var mapData in data)
         {
@@ -101,19 +107,36 @@ public class SaveHandler : MonoBehaviour
                     map.SetTile(tile.position, tile.tile);
                 }
             }
-        }
+        }*/
 
-        // save objects
+        // load objects
         List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>("objectData.json");
 
         foreach (var objData in objectData)
         {
-            GameObject obj = new GameObject(objData.name); 
+            GameObject prefab = Resources.Load<GameObject>("Wall");
+            GameObject obj = Instantiate(prefab);
+            obj.GetComponent<PlaceableObject>();
+            obj.AddComponent<ObjectDrag>();
             obj.transform.position = objData.position; 
-            obj.transform.rotation = objData.rotation; 
-                                                      
+            obj.transform.rotation = objData.rotation;
+            
+            obj.transform.SetParent(null);
+            obj.SetActive(true);
+
         }
     }
+
+    public void DestroyObjects()
+    {
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("Objects");
+
+        foreach (GameObject obj in objects)
+        {
+            Destroy(obj);
+        }
+    }
+
 }
 
 [Serializable]

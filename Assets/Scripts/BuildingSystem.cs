@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -24,6 +25,9 @@ public class BuildingSystem : MonoBehaviour
     public enum size { small, medium, large}
 
     private PlaceableObject objectToPlace;
+    public UnityEngine.UI.Slider scaleSlider;
+
+    size currentSize = size.small;
 
     #region Unity Methods
 
@@ -35,8 +39,25 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+
+    }
+
+    private void UpdateScale(float newScale)
+    {
+        Vector3 currentScale = objectToPlace.transform.localScale;
+        objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
+    }
+
     private void Update()
     {
+        if (scaleSlider != null && objectToPlace != null)
+        {
+            scaleSlider.value = objectToPlace.transform.localScale.x;
+            scaleSlider.onValueChanged.AddListener(UpdateScale);
+        }
+
         if (Input.GetKeyDown(KeyCode.A))
         {
             InitializeWithObject(prefab1);
@@ -58,7 +79,8 @@ public class BuildingSystem : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            changeSize(size.large);
+            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length); 
+            changeSize(currentSize);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
