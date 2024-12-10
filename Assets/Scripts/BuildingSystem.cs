@@ -33,10 +33,8 @@ public class BuildingSystem : MonoBehaviour
 
     private void Awake()
     {
-         {
-            current = this;
-            grid = gridLayout.gameObject.GetComponent<Grid>();
-        }
+        current = this;
+        grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
     private void Start()
@@ -176,20 +174,33 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
+    [SerializeField] public GameObject content;
+    [SerializeField] private GameObject objectPlacement;
+    [SerializeField] private GameObject objectScale;
+    [SerializeField] private GameObject saveLoad;
+    [SerializeField] private GameObject homeBtn;
+    Color defaultColor;
+
     private void unhighlightButtons()
     {
-        GameObject content = GameObject.Find("Content");
-        GameObject objectSelection = GameObject.Find("ObjectPlacement");
-        GameObject objectScale = GameObject.Find("ObjectScale");
-        GameObject saveLoad = GameObject.Find("SaveLoad");
-        objectSelection.transform.localPosition = new Vector3(1060, 0, 0);
-        objectScale.transform.localPosition = new Vector3(-1360, -350, 0);
-        saveLoad.transform.localPosition = new Vector3(960, -540, 0);
+        objectPlacement.SetActive(false);
+        objectScale.SetActive(false);
+        saveLoad.SetActive(true);
+        homeBtn.SetActive(true);
         foreach (Transform child in content.transform)
         {
             UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
-            btn.GetComponent<UnityEngine.UI.Image>().color = new Color(0, 64f / 255f, 128f / 255f);
+            btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
         }
+    }
+
+    private void Start()
+    {
+        Transform transformBtn = content.transform.GetChild(0);
+        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
+        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
+
+        unhighlightButtons();
     }
 
     public void InitializeWithObject(GameObject prefab)

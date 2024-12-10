@@ -9,11 +9,14 @@ public class DropDownScript : MonoBehaviour
     [SerializeField] private GameObject hideButton;
     [SerializeField] private GameObject showIcon;
     [SerializeField] private GameObject hideIcon;
-    
     // Start is called before the first frame update
     void Start()
     {
         rectTransform = GetComponent<RectTransform>();
+
+        showPos = rectTransform.anchoredPosition;
+        hidePos = showPos + new Vector3(0, -rectTransform.sizeDelta.y);
+
         showImg = showIcon.GetComponent<Image>();
         hideImg = hideIcon.GetComponent<Image>();
 
@@ -30,8 +33,8 @@ public class DropDownScript : MonoBehaviour
 
     Image showImg, hideImg;
     RectTransform rectTransform;
-    Vector3 hidePos = new Vector3(0, -150, 0);
-    Vector3 showPos = new Vector3(0, 0, 0);
+    Vector3 hidePos;
+    Vector3 showPos;
 
     bool isHidden = false;
     void ShowHide()
