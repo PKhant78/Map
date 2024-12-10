@@ -37,11 +37,6 @@ public class BuildingSystem : MonoBehaviour
         grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
-    private void Start()
-    {
-
-    }
-
     private void UpdateScale(float newScale)
     {
         Vector3 currentScale = objectToPlace.transform.localScale;
