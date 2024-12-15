@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -25,9 +24,6 @@ public class BuildingSystem : MonoBehaviour
     public enum size { small, medium, large}
 
     private PlaceableObject objectToPlace;
-    public UnityEngine.UI.Slider scaleSlider;
-
-    size currentSize = size.small;
 
     #region Unity Methods
 
@@ -37,20 +33,8 @@ public class BuildingSystem : MonoBehaviour
         grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
-    private void UpdateScale(float newScale)
-    {
-        Vector3 currentScale = objectToPlace.transform.localScale;
-        objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
-    }
-
     private void Update()
     {
-        if (scaleSlider != null && objectToPlace != null)
-        {
-            scaleSlider.value = objectToPlace.transform.localScale.x;
-            scaleSlider.onValueChanged.AddListener(UpdateScale);
-        }
-
         if (Input.GetKeyDown(KeyCode.A))
         {
             InitializeWithObject(prefab1);
@@ -72,8 +56,7 @@ public class BuildingSystem : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length); 
-            changeSize(currentSize);
+            changeSize(size.large);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -174,6 +157,7 @@ public class BuildingSystem : MonoBehaviour
     [SerializeField] private GameObject objectScale;
     [SerializeField] private GameObject saveLoad;
     [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
     Color defaultColor;
 
     private void unhighlightButtons()
@@ -182,10 +166,12 @@ public class BuildingSystem : MonoBehaviour
         objectScale.SetActive(false);
         saveLoad.SetActive(true);
         homeBtn.SetActive(true);
+        trashBtn.SetActive(true);
         foreach (Transform child in content.transform)
         {
             UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
-            btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
+            if (btn != null)
+                btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
         }
     }
 

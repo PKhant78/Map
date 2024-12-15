@@ -6,19 +6,19 @@ using UnityEngine;
 
 public static class FileHandler {
 
-    public static void SaveToJSON<T> (List<T> toSave, string filename, string customPath = null) {
-        //Debug.Log(GetPath(filename, customPath));
-        string content = JsonHelper.ToJson<T>(toSave.ToArray(), true);
-        WriteFile (GetPath (filename, customPath), content);
+    public static void SaveToJSON<T> (List<T> toSave, string filename) {
+        Debug.Log (GetPath (filename));
+        string content = JsonHelper.ToJson<T> (toSave.ToArray ());
+        WriteFile (GetPath (filename), content);
     }
 
-    public static void SaveToJSON<T> (T toSave, string filename, string customPath = null) {
-        string content = JsonUtility.ToJson (toSave, true);
-        WriteFile(GetPath(filename, customPath), content);
+    public static void SaveToJSON<T> (T toSave, string filename) {
+        string content = JsonUtility.ToJson (toSave);
+        WriteFile (GetPath (filename), content);
     }
 
-    public static List<T> ReadListFromJSON<T> (string filename, string customPath = null) {
-        string content = ReadFile (GetPath (filename, customPath));
+    public static List<T> ReadListFromJSON<T> (string filename) {
+        string content = ReadFile (GetPath (filename));
 
         if (string.IsNullOrEmpty (content) || content == "{}") {
             return new List<T> ();
@@ -30,8 +30,8 @@ public static class FileHandler {
 
     }
 
-    public static T ReadFromJSON<T> (string filename, string customPath = null) {
-        string content = ReadFile (GetPath (filename, customPath));
+    public static T ReadFromJSON<T> (string filename) {
+        string content = ReadFile (GetPath (filename));
 
         if (string.IsNullOrEmpty (content) || content == "{}") {
             return default (T);
@@ -43,15 +43,8 @@ public static class FileHandler {
 
     }
 
-    private static string GetPath (string filename, string customPath = null) {
-        string basePath = string.IsNullOrEmpty(customPath) ? Application.persistentDataPath : customPath;
-        if (Path.GetFileName(basePath) == filename)
-        {
-            return basePath;
-        }
-
-        return Path.Combine(basePath, filename);
-
+    private static string GetPath (string filename) {
+        return Application.persistentDataPath + "/" + filename;
     }
 
     private static void WriteFile (string path, string content) {
@@ -61,7 +54,6 @@ public static class FileHandler {
             writer.Write (content);
         }
     }
-
 
     private static string ReadFile (string path) {
         if (File.Exists (path)) {
