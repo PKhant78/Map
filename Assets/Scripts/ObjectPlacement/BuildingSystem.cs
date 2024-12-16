@@ -24,10 +24,12 @@ public class BuildingSystem : MonoBehaviour
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
 
+
     public enum size { small, medium, large}
     public UnityEngine.UI.Slider scaleSlider;
 
     size currentSize = size.small;
+
 
     private PlaceableObject objectToPlace;
 
@@ -204,7 +206,6 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-
     private void Start()
     {
         Transform transformBtn = content.transform.GetChild(0);
@@ -243,7 +244,6 @@ public class BuildingSystem : MonoBehaviour
         }
         return true;
     }
-
     private void SelectObject()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -262,7 +262,6 @@ public class BuildingSystem : MonoBehaviour
 
 
     }
-
 
     public void TakeArea(Vector3Int start, Vector3Int size)
     {

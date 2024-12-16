@@ -63,47 +63,32 @@ public class SaveHandler : MonoBehaviour
         string filepath = openFile.loadPath();
         if (filepath != null)
         {
+            
             DestroyObjects();
         }
 
-        // save objects
+        
         List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
 
         foreach (var objData in objectData)
         {
-            GameObject prefab = Resources.Load<GameObject>(objData.prefabName);
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/" + objData.prefabName);
             GameObject obj = Instantiate(prefab);
             obj.GetComponent<PlaceableObject>();
-            obj.AddComponent<ObjectDrag>();
             obj.transform.position = objData.position;
             obj.transform.rotation = objData.rotation;
             obj.transform.localScale = objData.scale;
-
+            obj.tag = "Selectable";
             obj.transform.SetParent(null);
             obj.SetActive(true);
 
         }
     }
+    
 
-    [Serializable]
-    public class TilemapData
-    {
-        public string key;
-        public List<TileInfo> tiles = new List<TileInfo>();
-    }
+}
 
-    [Serializable]
-    public class TileInfo
-    {
-        public TileBase tile;
-        public Vector3Int position;
-
-        public TileInfo(TileBase tile, Vector3Int pos)
-        {
-            this.tile = tile;
-            position = pos;
-        }
-    }
+   
 
     [Serializable]
     public class GameObjectData
@@ -135,4 +120,3 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
-}
