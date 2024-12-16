@@ -21,6 +21,9 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab2;
 
     public GameObject Selected; // Line added by Bryan
+    private float doubleClickTime = 0.3f;
+    private float lastClickTime = 0f;
+
 
     public enum size { small, medium, large}
     public UnityEngine.UI.Slider scaleSlider;
@@ -39,6 +42,16 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (Time.time - lastClickTime < doubleClickTime)
+            {
+                SelectObject();
+            }
+            lastClickTime = Time.time;
+        }
+
+
         if (scaleSlider != null && objectToPlace != null)
         {
             scaleSlider.value = objectToPlace.transform.localScale.x;
@@ -217,9 +230,32 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
+    private void SelectObject()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            Selected = hit.collider.gameObject;
+            objectToPlace = Selected.GetComponent<PlaceableObject>();
+            Debug.Log(Selected);
+            Selected.AddComponent<ObjectDrag>();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            UnfillArea(start, objectToPlace.Size);
+        }
+
+
+    }
+
+
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+    public void UnfillArea(Vector3Int start, Vector3Int size)
+    {
+        MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
 
     public void changeSize(size s)
