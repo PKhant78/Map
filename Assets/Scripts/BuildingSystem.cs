@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -22,6 +23,9 @@ public class BuildingSystem : MonoBehaviour
     public GameObject Selected; // Line added by Bryan
 
     public enum size { small, medium, large}
+    public UnityEngine.UI.Slider scaleSlider;
+
+    size currentSize = size.small;
 
     private PlaceableObject objectToPlace;
 
@@ -35,13 +39,10 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        if (scaleSlider != null && objectToPlace != null)
         {
-            InitializeWithObject(prefab1);
-        }
-        else if (Input.GetKeyDown(KeyCode.B))
-        {
-            InitializeWithObject(prefab2);
+            scaleSlider.value = objectToPlace.transform.localScale.x;
+            scaleSlider.onValueChanged.AddListener(UpdateScale);
         }
 
         if (!objectToPlace)
@@ -49,14 +50,10 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            objectToPlace.Rotate();
-        }
-
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            changeSize(size.large);
+            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length);
+            changeSize(currentSize);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -100,6 +97,12 @@ public class BuildingSystem : MonoBehaviour
         Vector3Int cellPos = gridLayout.WorldToCell(position);
         position = grid.GetCellCenterWorld(cellPos);
         return position;
+    }
+
+    private void UpdateScale(float newScale)
+    {
+        Vector3 currentScale = objectToPlace.transform.localScale;
+        objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
     }
 
     private static TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)

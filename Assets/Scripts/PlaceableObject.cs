@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlaceableObject : MonoBehaviour
 {
     public bool Placed { get; private set; }
+    public string prefabName;
     public Vector3Int Size { get; private set; }
     private Vector3[] Vertices;
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
 
 public class SaveHandler : MonoBehaviour
 {
@@ -11,9 +12,11 @@ public class SaveHandler : MonoBehaviour
     [SerializeField] BoundsInt bounds;
     [SerializeField] string filename = "tilemapData.json";
 
+    public OpenFile openFile;
+
     private void Start()
     {
-        
+
     }
 
     private void initObjects()
@@ -26,6 +29,16 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
+    private void DestroyObjects()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Objects");
+
+        foreach (var obj in gameObjects)
+        {
+            Destroy(obj);
+        }
+    }
+
     public void onSave()
     {
         initObjects();
@@ -33,13 +46,14 @@ public class SaveHandler : MonoBehaviour
 
         // save objects
         List<GameObjectData> objectData = new List<GameObjectData>();
+        string filepath = openFile.loadPath();
 
         foreach (var obj in objects)
         {
             objectData.Add(new GameObjectData(obj.Value));
         }
 
-        FileHandler.SaveToJSON<GameObjectData>(objectData, "objectData.json");
+        FileHandler.SaveToJSON<GameObjectData>(objectData, filepath);
 
     }
 
@@ -55,49 +69,72 @@ public class SaveHandler : MonoBehaviour
         }
 
         // save objects
-        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>("objectData.json");
+        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
 
         foreach (var objData in objectData)
         {
-            GameObject obj = new GameObject(objData.name); 
-            obj.transform.position = objData.position; 
-            obj.transform.rotation = objData.rotation; 
-                                                      
+            GameObject prefab = Resources.Load<GameObject>(objData.prefabName);
+            GameObject obj = Instantiate(prefab);
+            obj.GetComponent<PlaceableObject>();
+            obj.AddComponent<ObjectDrag>();
+            obj.transform.position = objData.position;
+            obj.transform.rotation = objData.rotation;
+            obj.transform.localScale = objData.scale;
+
+            obj.transform.SetParent(null);
+            obj.SetActive(true);
+
         }
     }
-}
 
-[Serializable]
-public class TilemapData
-{
-    public string key;
-    public List<TileInfo> tiles = new List<TileInfo>();
-}
-
-[Serializable]
-public class TileInfo
-{
-    public TileBase tile;
-    public Vector3Int position;
-
-    public TileInfo(TileBase tile, Vector3Int pos)
+    [Serializable]
+    public class TilemapData
     {
-        this.tile = tile;
-        position = pos;
+        public string key;
+        public List<TileInfo> tiles = new List<TileInfo>();
     }
-}
 
-[Serializable]
-public class GameObjectData
-{
-    public string name;
-    public Vector3 position;
-    public Quaternion rotation;
-
-    public GameObjectData(GameObject gameObject)
+    [Serializable]
+    public class TileInfo
     {
-        name = gameObject.name;
-        position = gameObject.transform.position;
-        rotation = gameObject.transform.rotation;
+        public TileBase tile;
+        public Vector3Int position;
+
+        public TileInfo(TileBase tile, Vector3Int pos)
+        {
+            this.tile = tile;
+            position = pos;
+        }
     }
+
+    [Serializable]
+    public class GameObjectData
+    {
+        public string name;
+        public string prefabName;
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 scale;
+
+        public GameObjectData(GameObject gameObject)
+        {
+            if (gameObject != null)
+            {
+                PlaceableObject obj = gameObject.GetComponent<PlaceableObject>();
+                if (obj != null)
+                {
+                    name = gameObject.name;
+                    prefabName = obj.prefabName;
+                    position = gameObject.transform.position;
+                    rotation = gameObject.transform.rotation;
+                    scale = gameObject.transform.localScale;
+                }
+                else
+                {
+                    Debug.LogWarning("PlaceableObject component not found on " + gameObject.name);
+                }
+            }
+        }
+    }
+
 }
