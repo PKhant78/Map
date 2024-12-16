@@ -36,8 +36,6 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
-<<<<<<< Updated upstream
-=======
     private void DestroyObjects()
     {
         GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Selectable");
@@ -48,7 +46,6 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
->>>>>>> Stashed changes
     public void onSave()
     {
         List<TilemapData> data = new List<TilemapData>();
@@ -96,9 +93,6 @@ public class SaveHandler : MonoBehaviour
 
         foreach(var mapData in data)
         {
-<<<<<<< Updated upstream
-            if (!tilemaps.ContainsKey(mapData.key))
-=======
             DestroyObjects();
         }
 
@@ -131,7 +125,6 @@ public class SaveHandler : MonoBehaviour
         public GameObjectData(GameObject gameObject)
         {
             if (gameObject != null)
->>>>>>> Stashed changes
             {
                 //Debug
             }

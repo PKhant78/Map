@@ -15,8 +15,6 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab1;
     public GameObject prefab2;
 
-<<<<<<< Updated upstream
-=======
     public GameObject Selected; // Line added by Bryan
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
@@ -26,7 +24,6 @@ public class BuildingSystem : MonoBehaviour
 
     size currentSize = size.small;
 
->>>>>>> Stashed changes
     private PlaceableObject objectToPlace;
 
     #region Unity Methods
@@ -122,8 +119,6 @@ public class BuildingSystem : MonoBehaviour
     #endregion
 
     #region Building Placement
-<<<<<<< Updated upstream
-=======
     // Lines added by Bryan
     public void RotateSelected()
     {
@@ -201,7 +196,6 @@ public class BuildingSystem : MonoBehaviour
 
         unhighlightButtons();
     }
->>>>>>> Stashed changes
 
     public void InitializeWithObject(GameObject prefab)
     {
@@ -230,8 +224,6 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
-<<<<<<< Updated upstream
-=======
     private void SelectObject()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -252,7 +244,6 @@ public class BuildingSystem : MonoBehaviour
     }
 
 
->>>>>>> Stashed changes
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
