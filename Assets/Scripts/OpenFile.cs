@@ -5,7 +5,7 @@ using SFB;
 using UnityEngine.UI;
 
 public class OpenFile : MonoBehaviour
-{ 
+{
     private string path;
     public Text filePathText;
 

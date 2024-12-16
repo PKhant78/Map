@@ -1,7 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SearchService;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class BuildingSystem : MonoBehaviour
 {
@@ -15,39 +20,43 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab1;
     public GameObject prefab2;
 
-<<<<<<< Updated upstream
-=======
     public GameObject Selected; // Line added by Bryan
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
+
 
     public enum size { small, medium, large}
     public UnityEngine.UI.Slider scaleSlider;
 
     size currentSize = size.small;
 
->>>>>>> Stashed changes
+
     private PlaceableObject objectToPlace;
 
     #region Unity Methods
 
     private void Awake()
     {
-         {
-            current = this;
-            grid = gridLayout.gameObject.GetComponent<Grid>();
-        }
+        current = this;
+        grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetMouseButtonDown(0))
         {
-            InitializeWithObject(prefab1);
+            if (Time.time - lastClickTime < doubleClickTime)
+            {
+                SelectObject();
+            }
+            lastClickTime = Time.time;
         }
-        else if (Input.GetKeyDown(KeyCode.B))
+
+
+        if (scaleSlider != null && objectToPlace != null)
         {
-            InitializeWithObject(prefab2);
+            scaleSlider.value = objectToPlace.transform.localScale.x;
+            scaleSlider.onValueChanged.AddListener(UpdateScale);
         }
 
         if (!objectToPlace)
@@ -55,9 +64,10 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            objectToPlace.Rotate();
+            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length);
+            changeSize(currentSize);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -103,6 +113,12 @@ public class BuildingSystem : MonoBehaviour
         return position;
     }
 
+    private void UpdateScale(float newScale)
+    {
+        Vector3 currentScale = objectToPlace.transform.localScale;
+        objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
+    }
+
     private static TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)
     {
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
@@ -122,8 +138,6 @@ public class BuildingSystem : MonoBehaviour
     #endregion
 
     #region Building Placement
-<<<<<<< Updated upstream
-=======
     // Lines added by Bryan
     public void RotateSelected()
     {
@@ -192,7 +206,6 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-
     private void Start()
     {
         Transform transformBtn = content.transform.GetChild(0);
@@ -201,7 +214,6 @@ public class BuildingSystem : MonoBehaviour
 
         unhighlightButtons();
     }
->>>>>>> Stashed changes
 
     public void InitializeWithObject(GameObject prefab)
     {
@@ -210,8 +222,11 @@ public class BuildingSystem : MonoBehaviour
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
-    }
 
+        // Lines added by Bryan
+        Selected = obj;
+        unhighlightButtons();
+    }
     private bool CanBePlaced(PlaceableObject placeableObject)
     {
         BoundsInt area = new BoundsInt();
@@ -229,9 +244,6 @@ public class BuildingSystem : MonoBehaviour
         }
         return true;
     }
-
-<<<<<<< Updated upstream
-=======
     private void SelectObject()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -251,11 +263,32 @@ public class BuildingSystem : MonoBehaviour
 
     }
 
-
->>>>>>> Stashed changes
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+    public void UnfillArea(Vector3Int start, Vector3Int size)
+    {
+        MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+
+    public void changeSize(size s)
+    {
+        GameObject obj = Selected;
+        switch (s)
+        {
+            case size.small:
+                obj.transform.localScale = new Vector3(1f, 1f, 1f);
+                break;
+            case size.medium:
+                obj.transform.localScale = new Vector3(3f, 3f, 3f);
+                break;
+            case size.large:
+                obj.transform.localScale = new Vector3(5f, 5f, 5f);
+                break;
+            default:
+                break;
+        }
     }
 
     #endregion
