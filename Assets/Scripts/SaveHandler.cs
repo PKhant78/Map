@@ -8,9 +8,7 @@ public class SaveHandler : MonoBehaviour
    Dictionary<string, Tilemap> tilemaps = new Dictionary<string, Tilemap>();
     Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 
-
     [SerializeField] BoundsInt bounds;
-    [SerializeField] string filename = "tilemapData.json";
 
     private void Start()
     {
@@ -30,7 +28,7 @@ public class SaveHandler : MonoBehaviour
 
     private void initObjects()
     {
-        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Objects");
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Selectable");
 
         foreach (var obj in gameObjects)
         {
@@ -38,6 +36,19 @@ public class SaveHandler : MonoBehaviour
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    private void DestroyObjects()
+    {
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Selectable");
+
+        foreach (var obj in gameObjects)
+        {
+            Destroy(obj);
+        }
+    }
+
+>>>>>>> Stashed changes
     public void onSave()
     {
         List<TilemapData> data = new List<TilemapData>();
@@ -85,7 +96,42 @@ public class SaveHandler : MonoBehaviour
 
         foreach(var mapData in data)
         {
+<<<<<<< Updated upstream
             if (!tilemaps.ContainsKey(mapData.key))
+=======
+            DestroyObjects();
+        }
+
+        // save objects
+        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
+
+        foreach (var objData in objectData)
+        {
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/" + objData.prefabName);
+            GameObject obj = Instantiate(prefab);
+            obj.GetComponent<PlaceableObject>();
+            obj.transform.position = objData.position;
+            obj.transform.rotation = objData.rotation;
+            obj.transform.localScale = objData.scale;
+            obj.tag = "Selectable";
+            obj.transform.SetParent(null);
+            obj.SetActive(true);
+
+        }
+    }
+    [Serializable]
+    public class GameObjectData
+    {
+        public string name;
+        public string prefabName;
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 scale;
+
+        public GameObjectData(GameObject gameObject)
+        {
+            if (gameObject != null)
+>>>>>>> Stashed changes
             {
                 //Debug
             }

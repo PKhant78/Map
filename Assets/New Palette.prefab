@@ -41,11 +41,31 @@ Grid:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5304626164179069479}
   m_Enabled: 1
+<<<<<<<< Updated upstream:Assets/New Palette.prefab
   m_CellSize: {x: 1, y: 1, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
 --- !u!1 &6514764073196319263
+========
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.21, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-7584943882849320386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 774359878834208502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71aca92abab00420dbe0b9f30de6f682, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabName: Window
+--- !u!1 &6497339837419579644
+>>>>>>>> Stashed changes:Assets/Resources/Prefabs/Window.prefab
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

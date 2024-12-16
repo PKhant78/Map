@@ -15,6 +15,18 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab1;
     public GameObject prefab2;
 
+<<<<<<< Updated upstream
+=======
+    public GameObject Selected; // Line added by Bryan
+    private float doubleClickTime = 0.3f;
+    private float lastClickTime = 0f;
+
+    public enum size { small, medium, large}
+    public UnityEngine.UI.Slider scaleSlider;
+
+    size currentSize = size.small;
+
+>>>>>>> Stashed changes
     private PlaceableObject objectToPlace;
 
     #region Unity Methods
@@ -110,6 +122,86 @@ public class BuildingSystem : MonoBehaviour
     #endregion
 
     #region Building Placement
+<<<<<<< Updated upstream
+=======
+    // Lines added by Bryan
+    public void RotateSelected()
+    {
+        if (Selected) objectToPlace.Rotate();
+    }
+
+    public void DestroySelected()
+    {
+        if (Selected)
+        {
+            Destroy(objectToPlace.gameObject);
+            Selected = null;
+            unhighlightButtons();
+        }
+    }
+
+    public void PlaceSelected()
+    {
+        if (Selected)
+        {
+            if (CanBePlaced(objectToPlace))
+            {
+                objectToPlace.Place();
+                Selected = null;
+                unhighlightButtons();
+                Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                TakeArea(start, objectToPlace.Size);
+            }
+        }
+    }
+
+    [SerializeField] public GameObject content;
+    [SerializeField] private GameObject objectPlacement;
+    [SerializeField] private GameObject objectScale;
+    [SerializeField] private GameObject saveLoad;
+    [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
+    Color defaultColor;
+
+    private void unhighlightButtons()
+    {
+        objectPlacement.SetActive(false);
+        objectScale.SetActive(false);
+        saveLoad.SetActive(true);
+        homeBtn.SetActive(true);
+        trashBtn.SetActive(true);
+        foreach (Transform child in content.transform)
+        {
+            UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
+            if (btn != null)
+                btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
+        }
+    }
+    private void highlightButtons()
+    {
+        objectPlacement.SetActive(true);
+        objectScale.SetActive(true);
+        saveLoad.SetActive(false);
+        homeBtn.SetActive(false);
+        trashBtn.SetActive(false);
+        foreach (Transform child in content.transform)
+        {
+            UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
+            if (btn != null)
+                btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
+        }
+    }
+
+
+    private void Start()
+    {
+        Transform transformBtn = content.transform.GetChild(0);
+        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
+        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
+
+        unhighlightButtons();
+    }
+>>>>>>> Stashed changes
 
     public void InitializeWithObject(GameObject prefab)
     {
@@ -138,6 +230,29 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
+<<<<<<< Updated upstream
+=======
+    private void SelectObject()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            Selected = hit.collider.gameObject;
+            objectToPlace = Selected.GetComponent<PlaceableObject>();
+            Debug.Log(Selected);
+            Selected.AddComponent<ObjectDrag>();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            UnfillArea(start, objectToPlace.Size);
+            highlightButtons();
+        }
+
+
+    }
+
+
+>>>>>>> Stashed changes
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
