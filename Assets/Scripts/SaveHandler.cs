@@ -5,7 +5,6 @@ using UnityEngine.Tilemaps;
 
 public class SaveHandler : MonoBehaviour
 {
-    Dictionary<string, Tilemap> tilemaps = new Dictionary<string, Tilemap>();
     Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
 
 
@@ -15,17 +14,7 @@ public class SaveHandler : MonoBehaviour
 
     private void Start()
     {
-        initTilemaps();
-    }
-
-    private void initTilemaps()
-    {
-        Tilemap[] maps = FindObjectsOfType<Tilemap>();
-
-        foreach (var map in maps)
-        {
-            tilemaps.Add(map.name, map);
-        }
+        
     }
 
     private void initObjects()
@@ -43,36 +32,6 @@ public class SaveHandler : MonoBehaviour
         initObjects();
         openFile.SaveFile();
 
-
-
-        /*
-        List<TilemapData> data = new List<TilemapData>();
-
-        foreach (var mapObj in tilemaps)
-        {
-            TilemapData mapData = new TilemapData();
-            mapData.key = mapObj.Key;
-
-            for (int x = bounds.xMin; x < bounds.xMax; x++)
-            {
-                for (int y = bounds.yMin; y < bounds.yMax; y++)
-                {
-                    Vector3Int pos = new Vector3Int(x, y, 0);
-                    TileBase tile = mapObj.Value.GetTile(pos);
-
-                    if (tile != null)
-                    {
-                        TileInfo ti = new TileInfo(tile, pos);
-                        mapData.tiles.Add(ti);
-                    }
-                }
-            }
-
-            data.Add(mapData);
-        }
-
-        FileHandler.SaveToJSON<TilemapData>(data, filename);*/
-
         // save objects
         List<GameObjectData> objectData = new List<GameObjectData>();
         string filepath = openFile.loadPath();
@@ -88,29 +47,6 @@ public class SaveHandler : MonoBehaviour
 
     public void onLoad()
     {
-        //List<TilemapData> data = FileHandler.ReadListFromJSON<TilemapData>(openFile.loadPath());
-
-        /*
-
-        foreach(var mapData in data)
-        {
-            if (!tilemaps.ContainsKey(mapData.key))
-            {
-                //Debug
-            }
-
-            var map = tilemaps[mapData.key];
-
-            map.ClearAllTiles();
-
-            if (mapData.tiles != null && mapData.tiles.Count > 0)
-            {
-                foreach (TileInfo tile in mapData.tiles)
-                {
-                    map.SetTile(tile.position, tile.tile);
-                }
-            }
-        }*/
 
         // load objects
         openFile.LoadFile();

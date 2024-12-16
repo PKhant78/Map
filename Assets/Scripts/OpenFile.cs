@@ -12,7 +12,7 @@ public class OpenFile : MonoBehaviour
 
     void Start()
     {
-        //openFileButton.onClick.AddListener(LoadFile);
+        
     }
 
     public void LoadFile()
