@@ -22,13 +22,8 @@ public class DropDownScript : MonoBehaviour
 
         Button button = hideButton.GetComponent<Button>();
         button.onClick.AddListener(() => ShowHide());
+
         ShowHide();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     Image showImg, hideImg;

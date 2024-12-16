@@ -11,6 +11,7 @@ public class HighlightShowHide : MonoBehaviour
     Vector3 objectScalePos;
     [SerializeField] private GameObject saveLoad;
     [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
     Color selectedColor = new Color(1, 32f / 255f, 152f / 255f);
 
     void highlightBtn(Button button)
@@ -21,6 +22,7 @@ public class HighlightShowHide : MonoBehaviour
         objectScale.SetActive(true);
         saveLoad.SetActive(false);
         homeBtn.SetActive(false);
+        trashBtn.SetActive(false);
     }
 
     // Start is called before the first frame update
@@ -31,7 +33,8 @@ public class HighlightShowHide : MonoBehaviour
         foreach (Transform child in transform)
         {
             Button btn = child.GetComponent<Button>();
-            btn.onClick.AddListener(() => highlightBtn(btn));
+            if (btn != null)
+                btn.onClick.AddListener(() => highlightBtn(btn));
         }
     }
 

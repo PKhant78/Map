@@ -9,8 +9,7 @@ public class SaveHandler : MonoBehaviour
 
 
     [SerializeField] BoundsInt bounds;
-
-    public OpenFile openFile;
+    [SerializeField] string filename = "tilemapData.json";
 
     private void Start()
     {
@@ -22,8 +21,8 @@ public class SaveHandler : MonoBehaviour
         GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Objects");
 
         foreach (var obj in gameObjects)
-        { 
-            objects.Add(obj.GetInstanceID().ToString(), obj);
+        {
+            objects.Add(obj.name, obj);
         }
     }
 
@@ -34,14 +33,13 @@ public class SaveHandler : MonoBehaviour
 
         // save objects
         List<GameObjectData> objectData = new List<GameObjectData>();
-        string filepath = openFile.loadPath();
 
         foreach (var obj in objects)
         {
             objectData.Add(new GameObjectData(obj.Value));
         }
 
-        FileHandler.SaveToJSON<GameObjectData>(objectData, filepath);
+        FileHandler.SaveToJSON<GameObjectData>(objectData, "objectData.json");
 
     }
 
@@ -56,35 +54,17 @@ public class SaveHandler : MonoBehaviour
             DestroyObjects();
         }
 
-        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
-
+        // save objects
+        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>("objectData.json");
 
         foreach (var objData in objectData)
         {
-            GameObject prefab = Resources.Load<GameObject>(objData.prefabName);
-            GameObject obj = Instantiate(prefab);
-            obj.GetComponent<PlaceableObject>();
-            obj.AddComponent<ObjectDrag>();
+            GameObject obj = new GameObject(objData.name); 
             obj.transform.position = objData.position; 
-            obj.transform.rotation = objData.rotation;
-            obj.transform.localScale = objData.scale;
-            
-            obj.transform.SetParent(null);
-            obj.SetActive(true);
-
+            obj.transform.rotation = objData.rotation; 
+                                                      
         }
     }
-
-    public void DestroyObjects()
-    {
-        GameObject[] objects = GameObject.FindGameObjectsWithTag("Objects");
-
-        foreach (GameObject obj in objects)
-        {
-            Destroy(obj);
-        }
-    }
-
 }
 
 [Serializable]
@@ -111,28 +91,13 @@ public class TileInfo
 public class GameObjectData
 {
     public string name;
-    public string prefabName;
     public Vector3 position;
     public Quaternion rotation;
-    public Vector3 scale;
 
     public GameObjectData(GameObject gameObject)
     {
-        if (gameObject != null)
-        {
-            PlaceableObject obj = gameObject.GetComponent<PlaceableObject>();
-            if (obj != null)
-            {
-                name = gameObject.name;
-                prefabName = obj.prefabName;
-                position = gameObject.transform.position;
-                rotation = gameObject.transform.rotation;
-                scale = gameObject.transform.localScale;
-            }
-            else
-            {
-                Debug.LogWarning("PlaceableObject component not found on " + gameObject.name);
-            }
-        }
+        name = gameObject.name;
+        position = gameObject.transform.position;
+        rotation = gameObject.transform.rotation;
     }
 }

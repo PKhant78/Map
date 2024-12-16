@@ -6,7 +6,7 @@ using UnityEngine;
 public class Timer
 {
     private GameObject owner;
-    private float time;
+    private double duration;
     private Action callback;
 
     MonoBehaviourHook hook;
@@ -15,35 +15,37 @@ public class Timer
         public Action tick;
         private void Update()
         {
-            if (tick != null) tick();
+            if (tick != null)
+                tick();
         }
     }
 
-    public static void After(GameObject owner, float time, Action callback)
+    public static void After(GameObject owner, double duration, Action callback)
     {
-        Timer timer = new Timer(owner, time, callback);
+        Timer timer = new Timer(owner, duration, callback);
         owner.AddComponent<MonoBehaviourHook>().tick = timer.Tick;
     }
 
-    public Timer(GameObject owner, float time, Action callback)
+    public Timer(GameObject owner, double duration, Action callback)
     {
         this.owner = owner;
-        this.time = time;
+        this.duration = duration;
         this.callback = callback;
     }
 
     private void Tick()
     {
-        if(Complete())
+        if(Completed())
         {
             callback();
             UnityEngine.Object.Destroy(owner.GetComponent<MonoBehaviourHook>());
+
             return;
         }
     }
 
-    public bool Complete()
+    public bool Completed()
     {
-        return this.time <= 0f;
+        return this.duration <= 0f;
     }
 }
