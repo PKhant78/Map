@@ -12,29 +12,19 @@ public class OpenFile : MonoBehaviour
 
     void Start()
     {
-        //openFileButton.onClick.AddListener(LoadFile);
+        openFileButton.onClick.AddListener(OpenFileW);
     }
 
-    public void LoadFile()
+    public void OpenFileW()
     {
         var paths = StandaloneFileBrowser.OpenFilePanel("Load JSON File", "", "json", false);
 
         
         if (paths.Length > 0)
         {
-            string selectedPath = paths[0];
+            string selectedPath = paths.Length > 0 ? paths[0] : null;
             setPath(selectedPath);
             filePathText.text = "Selected File: " + paths[0];
-        }
-    }
-    public void SaveFile()
-    {
-        string path = StandaloneFileBrowser.SaveFilePanel("Save JSON File", "", "SaveFile", "json");
-
-        if (!string.IsNullOrEmpty(path))
-        {
-            setPath(path);
-            filePathText.text = "Save File: " + path;
         }
     }
 
@@ -45,9 +35,7 @@ public class OpenFile : MonoBehaviour
 
     public string loadPath()
     {
-        Debug.Log(path);
         return path;
-        
     }
 
 
