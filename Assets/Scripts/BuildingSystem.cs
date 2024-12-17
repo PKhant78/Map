@@ -21,8 +21,11 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab2;
 
     public GameObject Selected; // Line added by Bryan
+    private float doubleClickTime = 0.3f;
+    private float lastClickTime = 0f;
 
-    public enum size { small, medium, large}
+
+    public enum size { small, medium, large }
     public UnityEngine.UI.Slider scaleSlider;
 
     size currentSize = size.small;
@@ -39,6 +42,16 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (Time.time - lastClickTime < doubleClickTime)
+            {
+                SelectObject();
+            }
+            lastClickTime = Time.time;
+        }
+
+
         if (scaleSlider != null && objectToPlace != null)
         {
             scaleSlider.value = objectToPlace.transform.localScale.x;
@@ -75,11 +88,11 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-        #endregion
+    #endregion
 
-        #region Utils
+    #region Utils
 
-        public static Vector3 GetMouseWorldPosition()
+    public static Vector3 GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
@@ -92,7 +105,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    public Vector3 SnapCoordinationToGrid (Vector3 position)
+    public Vector3 SnapCoordinationToGrid(Vector3 position)
     {
         Vector3Int cellPos = gridLayout.WorldToCell(position);
         position = grid.GetCellCenterWorld(cellPos);
@@ -110,15 +123,16 @@ public class BuildingSystem : MonoBehaviour
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
         int counter = 0;
 
-        foreach (var v in area.allPositionsWithin) {
-            Vector3Int pos = new Vector3Int(v.x, v.y, z:0);
+        foreach (var v in area.allPositionsWithin)
+        {
+            Vector3Int pos = new Vector3Int(v.x, v.y, z: 0);
 
             array[counter] = tilemap.GetTile(pos);
             counter++;
         }
 
         return array;
-        
+
     }
 
     #endregion
@@ -189,6 +203,7 @@ public class BuildingSystem : MonoBehaviour
 
     public void InitializeWithObject(GameObject prefab)
     {
+        if (Selected) Selected.GetComponent<PlaceableObject>().Place();
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
@@ -217,9 +232,32 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
+    private void SelectObject()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            Selected = hit.collider.gameObject;
+            objectToPlace = Selected.GetComponent<PlaceableObject>();
+            Debug.Log(Selected);
+            Selected.AddComponent<ObjectDrag>();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            UnfillArea(start, objectToPlace.Size);
+        }
+
+
+    }
+
+
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+    public void UnfillArea(Vector3Int start, Vector3Int size)
+    {
+        MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
 
     public void changeSize(size s)

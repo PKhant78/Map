@@ -19,7 +19,7 @@ public class OpenFile : MonoBehaviour
     {
         var paths = StandaloneFileBrowser.OpenFilePanel("Load JSON File", "", "json", false);
 
-        
+
         if (paths.Length > 0)
         {
             string selectedPath = paths[0];
@@ -38,7 +38,7 @@ public class OpenFile : MonoBehaviour
         }
     }
 
-    private void setPath(string p) 
+    private void setPath(string p)
     {
         path = p;
     }
@@ -47,7 +47,7 @@ public class OpenFile : MonoBehaviour
     {
         Debug.Log(path);
         return path;
-        
+
     }
 
 
