@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
-  productName: Module 3 (2)
+  companyName: PKT
+  productName: EnvironBuild
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -84,7 +84,6 @@ PlayerSettings:
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
   Force IOS Speakers When Recording: 0
-  audioSpatialExperience: 0
   deferSystemGesturesMode: 0
   hideHomeButton: 0
   submitAnalytics: 1
@@ -832,7 +831,13 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
+    Build: 0
+    Game Performance: 0
+    Legacy Analytics: 0
+    Purchasing: 0
+    UDP: 0
     UNet: 1
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -852,11 +857,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: a55f4ec8-7698-41e7-8b42-ec25d1e804cc
+  cloudProjectId: 2c024bc0-87d4-4e31-b229-1164022149e7
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Module 3 (2)
-  organizationId: mugen2
+  projectName: EnvironBuild
+  organizationId: puni378
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
