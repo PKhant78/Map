@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlaceableObject : MonoBehaviour
 {
     public bool Placed { get; private set; }
+    public string prefabName;
     public Vector3Int Size { get; private set; }
     private Vector3[] Vertices;
 
@@ -25,7 +26,7 @@ public class PlaceableObject : MonoBehaviour
 
         for (int i = 0; i < vertices.Length; i++)
         {
-            Vector3 worldPos = transform.TransformPoint(vertices[1]);
+            Vector3 worldPos = transform.TransformPoint(vertices[i]);
             vertices[i] = BuildingSystem.current.gridLayout.WorldToCell(worldPos);
         }
 
@@ -65,6 +66,6 @@ public class PlaceableObject : MonoBehaviour
         Destroy(drag);
 
         Placed = true;
-
+        gameObject.tag = "Selectable";
     }
 }

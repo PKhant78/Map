@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -20,8 +21,14 @@ public class BuildingSystem : MonoBehaviour
     public GameObject prefab2;
 
     public GameObject Selected; // Line added by Bryan
+    private float doubleClickTime = 0.3f;
+    private float lastClickTime = 0f;
+
 
     public enum size { small, medium, large}
+    public UnityEngine.UI.Slider scaleSlider;
+
+    size currentSize = size.small;
 
     private PlaceableObject objectToPlace;
 
@@ -35,13 +42,20 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetMouseButtonDown(0))
         {
-            InitializeWithObject(prefab1);
+            if (Time.time - lastClickTime < doubleClickTime)
+            {
+                SelectObject();
+            }
+            lastClickTime = Time.time;
         }
-        else if (Input.GetKeyDown(KeyCode.B))
+
+
+        if (scaleSlider != null && objectToPlace != null)
         {
-            InitializeWithObject(prefab2);
+            scaleSlider.value = objectToPlace.transform.localScale.x;
+            scaleSlider.onValueChanged.AddListener(UpdateScale);
         }
 
         if (!objectToPlace)
@@ -49,14 +63,10 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            objectToPlace.Rotate();
-        }
-
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            changeSize(size.large);
+            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length);
+            changeSize(currentSize);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -100,6 +110,12 @@ public class BuildingSystem : MonoBehaviour
         Vector3Int cellPos = gridLayout.WorldToCell(position);
         position = grid.GetCellCenterWorld(cellPos);
         return position;
+    }
+
+    private void UpdateScale(float newScale)
+    {
+        Vector3 currentScale = objectToPlace.transform.localScale;
+        objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
     }
 
     private static TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)
@@ -214,9 +230,32 @@ public class BuildingSystem : MonoBehaviour
         return true;
     }
 
+    private void SelectObject()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            Selected = hit.collider.gameObject;
+            objectToPlace = Selected.GetComponent<PlaceableObject>();
+            Debug.Log(Selected);
+            Selected.AddComponent<ObjectDrag>();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            UnfillArea(start, objectToPlace.Size);
+        }
+
+
+    }
+
+
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+    }
+    public void UnfillArea(Vector3Int start, Vector3Int size)
+    {
+        MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
 
     public void changeSize(size s)
