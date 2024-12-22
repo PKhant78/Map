@@ -5,10 +5,6 @@ The purpose of the Custom Environment Builder is to allow users to build virtual
 The Custom Environment Builder enables the user to create environments composed of objects based on the object selection hotbar. Furthermore, the user will be able to save current progress and load the environments they have made.
 
 This application was developed using Unity 3D and C#.
- 
-## Demo
-
-Click [here](https://play.unity.com/en/games/9b656255-4b94-45e2-83d2-f1892d04732b/environment-builder-for-mrcane) to try out the demo.
 
 ## Design
 ### 1. Tilemap System
@@ -39,6 +35,10 @@ Click [here](https://play.unity.com/en/games/9b656255-4b94-45e2-83d2-f1892d04732
 - Click on the Trash icon to begin using the Delete Tool. Use the delete tool to delete objects along the tilemap
 - Scale the width of the currently selected object with the draggable scale hud which appears on object selection
 - Object width can be scaled up to 10 times it original width or shrunk to half its original width
+
+## Demo
+
+Click [here](https://play.unity.com/en/games/9b656255-4b94-45e2-83d2-f1892d04732b/environment-builder-for-mrcane) to try out the demo.
 
 ## Limitations
 
