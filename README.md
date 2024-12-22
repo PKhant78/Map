@@ -18,6 +18,13 @@ Click [here](https://play.unity.com/en/games/9b656255-4b94-45e2-83d2-f1892d04732
 - Load previous builds or builds made by others
 
 ## User Interface
+- Navigate between four categories of objects (Exterior, Desks, Shapes)
+- Select objects from these categories and click-and-drag them to position them about the tilemap within a boundary
+- Delete, place, and rotate the currently selected by 90 degress. Once an object is placed, it can be double-click to be moved again
+- Select another object while currently selecting one to swap currently selected objects
+- Click on the Trash icon to begin using the Delete Tool. Use the delete tool to delete objects along the tilemap
+- Scale the width of the currently selected object with the draggable scale hud which appears on object selection
+- Object width can be scaled up to 10 times it original width or shrunk to half its original width
 
 ## Limitations
 
