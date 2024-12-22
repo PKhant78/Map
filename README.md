@@ -10,12 +10,26 @@ This application was developed using Unity 3D and C#.
 
 Click [here](https://play.unity.com/en/games/9b656255-4b94-45e2-83d2-f1892d04732b/environment-builder-for-mrcane) to try out the demo.
 
-## Features
-- Tilemap Grid System 
-- Place, remove, rotate, and perform additional actions for building objects 
-- Select objects from different categories
-- Save current build
-- Load previous builds or builds made by others
+## Design
+### 1. Tilemap System
+- A grid system that allows the user to place objects and maintain consistent spacing.
+- A boundary is set so the user cannot place objects outside of this boundary.
+
+### 2. Object Placement
+- Place objects by drag-and-drop.
+- Cancel object placement.
+- Rotate objects.
+- Delete objects.
+- Confirm object placement.
+- Double-click to reselect an object.
+
+### 3. Object Selection
+- Select different objects from various categories.
+- Change the scale of objects.
+
+### 4. Save/Load the Environment
+- Save the environment to a JSON file.
+- Load the environment from a JSON file.
 
 ## User Interface
 - Navigate between four categories of objects (Exterior, Desks, Shapes)
