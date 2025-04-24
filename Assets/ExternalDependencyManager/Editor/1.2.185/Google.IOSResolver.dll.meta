@@ -16,10 +16,12 @@ PluginImporter:
   isExplicitlyReferenced: 0
   validateReferences: 1
   platformData:
+
     Any:
       enabled: 0
       settings: {}
     Editor:
+
       enabled: 1
       settings:
         DefaultValueInitialized: true
