@@ -206,15 +206,6 @@ public class PlaceableObject : MonoBehaviour
             {
                 return;
             }
-
-            // If this object is red (unplaceable) and another object is selected, destroy this
-            if (!Placed && BuildingSystem.current.Selected != null && 
-                BuildingSystem.current.Selected != gameObject)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
             if (BuildingSystem.current.Selected == gameObject)
             {
                 SetColor(new Color(1, 1, 0, 0.3f)); // Yellow - Selected
