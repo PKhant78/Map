@@ -7,7 +7,7 @@ labels:
 - gvhp_exportpath-Firebase/Editor/Firebase.Editor.dll
 PluginImporter:
   externalObjects: {}
-  serializedVersion: 2
+  serializedVersion: 3
   iconMap: {}
   executionOrder: {}
   defineConstraints: []
@@ -21,69 +21,28 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: None
-  - first:
-      : LinuxUniversal
-    second:
-      enabled: 0
-      settings:
-        CPU: None
-  - first:
-      : OSXIntel
-    second:
-      enabled: 0
-      settings:
-        CPU: None
-  - first:
-      : OSXIntel64
-    second:
-      enabled: 0
-      settings:
-        CPU: None
-  - first:
-      : Web
-    second:
-      enabled: 0
-      settings: {}
-  - first:
-      : WebStreamed
-    second:
-      enabled: 0
-      settings: {}
-  - first:
-      Android: Android
-    second:
-      enabled: 0
-      settings:
         CPU: AnyCPU
-  - first:
-      Any: 
-    second:
+    Any:
       enabled: 0
       settings: {}
-  - first:
-      Editor: Editor
-    second:
+    Editor:
       enabled: 1
       settings:
         CPU: AnyCPU
         DefaultValueInitialized: true
         OS: AnyOS
-  - first:
-      Standalone: Linux64
-    second:
+    Linux64:
       enabled: 0
       settings:
         CPU: None
-  - first:
-      Standalone: OSXUniversal
-    second:
+    OSXUniversal:
       enabled: 0
       settings:
         CPU: None
-  - first:
-      Standalone: Win
-    second:
+    WebGL:
+      enabled: 0
+      settings: {}
+    Win:
       enabled: 0
       settings:
         CPU: None
@@ -106,9 +65,8 @@ PluginImporter:
       settings:
         CompileFlags: 
         FrameworkDependencies: 
-  - first:
-      tvOS: tvOS
-    second:
+
+    tvOS:
       enabled: 0
       settings:
         CompileFlags: 
