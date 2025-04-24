@@ -32,6 +32,8 @@ public class BuildingSystem : MonoBehaviour
 
 
     private PlaceableObject objectToPlace;
+    // TODO: initialize this variable when an environment is loaded into the editor - Chaniel
+    public static int CurrentPlaceableID;
 
     #region Unity Methods
 
@@ -220,6 +222,7 @@ public class BuildingSystem : MonoBehaviour
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+        obj.name = prefab.name + " #" + CurrentPlaceableID++;
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
 

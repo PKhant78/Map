@@ -12,11 +12,6 @@ public class SaveHandler : MonoBehaviour
 
     public OpenFile openFile;
 
-    private void Start()
-    {
-
-    }
-
     private void initObjects()
     {
         GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Selectable");
@@ -63,20 +58,21 @@ public class SaveHandler : MonoBehaviour
         string filepath = openFile.loadPath();
         if (filepath != null)
         {
-            
+
             DestroyObjects();
         }
 
-        
+
         List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
 
         foreach (var objData in objectData)
         {
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + objData.prefabName);
             GameObject obj = Instantiate(prefab);
+
             obj.GetComponent<PlaceableObject>();
-            obj.transform.position = objData.position;
-            obj.transform.rotation = objData.rotation;
+            obj.name = objData.name;
+            obj.transform.SetPositionAndRotation(objData.position, objData.rotation);
             obj.transform.localScale = objData.scale;
             obj.tag = "Selectable";
             obj.transform.SetParent(null);
@@ -84,39 +80,41 @@ public class SaveHandler : MonoBehaviour
 
         }
     }
-    
+
 
 }
 
-   
 
-    [Serializable]
-    public class GameObjectData
+
+[Serializable]
+public class GameObjectData
+{
+    public int ID;
+    public string name;
+    public string prefabName;
+    public Vector3 position;
+    public Quaternion rotation;
+    public Vector3 scale;
+
+    public GameObjectData(GameObject gameObject)
     {
-        public string name;
-        public string prefabName;
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 scale;
-
-        public GameObjectData(GameObject gameObject)
+        if (gameObject != null)
         {
-            if (gameObject != null)
+            PlaceableObject obj = gameObject.GetComponent<PlaceableObject>();
+            if (obj != null)
             {
-                PlaceableObject obj = gameObject.GetComponent<PlaceableObject>();
-                if (obj != null)
-                {
-                    name = gameObject.name;
-                    prefabName = obj.prefabName;
-                    position = gameObject.transform.position;
-                    rotation = gameObject.transform.rotation;
-                    scale = gameObject.transform.localScale;
-                }
-                else
-                {
-                    Debug.LogWarning("PlaceableObject component not found on " + gameObject.name);
-                }
+                name = gameObject.name;
+                ID = int.Parse(name[(name.IndexOf('#') + 1)..]);
+                prefabName = obj.prefabName;
+                position = gameObject.transform.position;
+                rotation = gameObject.transform.rotation;
+                scale = gameObject.transform.localScale;
+            }
+            else
+            {
+                Debug.LogWarning("PlaceableObject component not found on " + gameObject.name);
             }
         }
     }
+}
 
