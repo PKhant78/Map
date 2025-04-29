@@ -6,31 +6,33 @@ using UnityEngine;
 
 public static class FileHandler {
 
-    public static void SaveToJSON<T>(List<T> toSave, string filename, string customPath = null)
+    public static void SaveToJSON(List<GameObjectData> toSave, string filename, string customPath = null)
     {
         //Debug.Log(GetPath(filename, customPath));
-        string content = JsonHelper.ToJson<T>(toSave.ToArray(), true);
+        string content = JsonHelper.Serialize(toSave.ToArray(), true);
         WriteFile(GetPath(filename, customPath), content);
     }
 
-    public static void SaveToJSON<T>(T toSave, string filename, string customPath = null)
-    {
-        string content = JsonUtility.ToJson(toSave, true);
-        WriteFile(GetPath(filename, customPath), content);
-    }
-
-    public static List<T> ReadListFromJSON<T>(string filename, string customPath = null)
+    public static List<GameObjectData> ReadListFromJSON(string filename, string customPath = null)
     {
         string content = ReadFile(GetPath(filename, customPath));
 
         if (string.IsNullOrEmpty (content) || content == "{}") {
-            return new List<T> ();
+            return new List<GameObjectData> ();
         }
 
-        List<T> res = JsonHelper.FromJson<T> (content).ToList ();
+        return JsonHelper.Deserialize(content).Items.ToList();
+    }
 
-        return res;
+    public static int ReadIDFromJSON(string filename, string customPath = null)
+    {
+        string content = ReadFile(GetPath(filename, customPath));
 
+        if (string.IsNullOrEmpty (content) || content == "{}") {
+            return 0;
+        }
+
+        return JsonHelper.Deserialize(content).HighestID;
     }
 
     public static T ReadFromJSON<T>(string filename, string customPath = null)
@@ -74,29 +76,5 @@ public static class FileHandler {
             }
         }
         return "";
-    }
-}
-
-public static class JsonHelper {
-    public static T[] FromJson<T> (string json) {
-        Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>> (json);
-        return wrapper.Items;
-    }
-
-    public static string ToJson<T> (T[] array) {
-        Wrapper<T> wrapper = new Wrapper<T> ();
-        wrapper.Items = array;
-        return JsonUtility.ToJson (wrapper);
-    }
-
-    public static string ToJson<T> (T[] array, bool prettyPrint) {
-        Wrapper<T> wrapper = new Wrapper<T> ();
-        wrapper.Items = array;
-        return JsonUtility.ToJson (wrapper, prettyPrint);
-    }
-
-    [Serializable]
-    private class Wrapper<T> {
-        public T[] Items;
     }
 }

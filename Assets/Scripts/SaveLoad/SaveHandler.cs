@@ -46,7 +46,7 @@ public class SaveHandler : MonoBehaviour
             objectData.Add(new GameObjectData(obj.Value));
         }
 
-        FileHandler.SaveToJSON<GameObjectData>(objectData, filepath);
+        FileHandler.SaveToJSON(objectData, filepath);
 
     }
 
@@ -63,8 +63,9 @@ public class SaveHandler : MonoBehaviour
         }
 
 
-        List<GameObjectData> objectData = FileHandler.ReadListFromJSON<GameObjectData>(filepath);
-
+        List<GameObjectData> objectData = FileHandler.ReadListFromJSON(filepath);
+        BuildingSystem.CurrentPlaceableID = FileHandler.ReadIDFromJSON(filepath);
+        
         foreach (var objData in objectData)
         {
             GameObject prefab = Resources.Load<GameObject>("Prefabs/" + objData.prefabName);
