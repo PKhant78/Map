@@ -219,6 +219,7 @@ public class BuildingSystem : MonoBehaviour
     {
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
+        position.y += 0.8f;
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
