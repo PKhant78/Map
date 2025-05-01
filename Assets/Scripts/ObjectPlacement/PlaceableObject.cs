@@ -104,15 +104,21 @@ public class PlaceableObject : MonoBehaviour
         Vertices = vertices;
     }
 
-    public virtual void Place()
+    public void Place()
     {
+        if (IsOverlapping())
+        {
+            Debug.LogWarning("Cannot place object here - Overlapping with another object.");
+            return; // Prevent placement
+        }
+
         ObjectDrag drag = gameObject.GetComponent<ObjectDrag>();
         Destroy(drag);
 
         lastPlacedObject = this;
         Placed = true;
         gameObject.tag = "Selectable";
-        
+
         UpdateAllObjectColors();
     }
 
@@ -148,6 +154,30 @@ public class PlaceableObject : MonoBehaviour
             else
             {
                 skinnedMeshRenderer.material.color = color;
+            }
+        }
+    }
+
+    private void SetOutlineColor(Color outlineColor)
+    {
+        if (objectRenderer is MeshRenderer meshRenderer)
+        {
+            foreach (Material material in meshRenderer.materials)
+            {
+                if (material.HasProperty("_Outline_Color"))
+                {
+                    material.SetColor("_Outline_Color", outlineColor); // Update only the outline color
+                }
+            }
+        }
+        else if (objectRenderer is SkinnedMeshRenderer skinnedMeshRenderer)
+        {
+            foreach (Material material in skinnedMeshRenderer.materials)
+            {
+                if (material.HasProperty("_Outline_Color"))
+                {
+                    material.SetColor("_Outline_Color", outlineColor); // Update only the outline color
+                }
             }
         }
     }
@@ -206,27 +236,41 @@ public class PlaceableObject : MonoBehaviour
             {
                 return;
             }
-            if (BuildingSystem.current.Selected == gameObject)
+
+            if (IsOverlapping())
             {
-                SetColor(new Color(1, 1, 0, 0.3f)); // Yellow - Selected
+                SetOutlineColor(new Color(1, 0, 0, 1)); // Red outline for invalid placement
             }
-            else if (this == lastPlacedObject && Placed)
+            else if (BuildingSystem.current.Selected == gameObject)
             {
-                SetColor(new Color(0, 1, 0, 0.3f)); // Green - Last Placed
+                SetOutlineColor(new Color(0, 1, 0, 1)); // Green outline for selected
             }
             else if (Placed)
             {
-                SetColor(new Color(0.5f, 0.5f, 0.5f, 0.2f)); // Gray - Already Placed
+                SetOutlineColor(new Color(1, 1, 0, 1)); // Yellow outline for already placed
             }
             else
             {
-                SetColor(new Color(1, 0, 0, 0.3f)); // Red - Can't Place
+                SetOutlineColor(new Color(1, 0, 0, 1)); // Red outline for can't place
             }
         }
         catch (Exception e)
         {
             Debug.LogError($"Error in ObjectColors for {gameObject.name}: {e.Message}");
         }
+    }
+
+    private bool IsOverlapping()
+    {
+        Collider[] colliders = Physics.OverlapBox(transform.position, GetComponent<Collider>().bounds.extents, transform.rotation, LayerMask.GetMask("PlaceableObject"));
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject != gameObject) // Ignore self
+            {
+                return true; // Overlap detected
+            }
+        }
+        return false; // No overlap
     }
 }
 

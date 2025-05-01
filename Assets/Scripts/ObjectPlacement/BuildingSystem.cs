@@ -217,15 +217,34 @@ public class BuildingSystem : MonoBehaviour
 
     public void InitializeWithObject(GameObject prefab)
     {
+        // Snap the position to the grid
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
-        position.y += 0.8f;
+        // Instantiate the object
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+
+        // Calculate the Y-offset dynamically based on the object's bounds
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            position.y += renderer.bounds.extents.y + 0.8f; // Half the height of the object + 0.8f
+        }
+        else
+        {
+            position.y += 0.8f; // Default offset if no renderer is found
+        }
+
+        // Apply the adjusted position
+        obj.transform.position = position;
+
+        // Set up the object for placement
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
 
-        // Lines added by Bryan
+        // Mark the object as selected
         Selected = obj;
+
+        // Update UI buttons
         unhighlightButtons();
     }
     private bool CanBePlaced(PlaceableObject placeableObject)
