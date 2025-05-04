@@ -11,30 +11,40 @@ using UnityEngine.UIElements;
 public class BuildingSystem : MonoBehaviour
 {
     public static BuildingSystem current;
-
     public GridLayout gridLayout;
     private Grid grid;
     [SerializeField] private Tilemap MainTilemap;
     [SerializeField] private TileBase whiteTile;
 
+    // Prefabs & Objects
     public GameObject prefab1;
     public GameObject prefab2;
-
     public GameObject Selected; // Line added by Bryan
+
+    // Input Settings
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
 
 
+    // Scaling Objects 
     public enum size { small, medium, large}
     public UnityEngine.UI.Slider scaleSlider;
-
     size currentSize = size.small;
 
 
     private PlaceableObject objectToPlace;
 
-    #region Unity Methods
+    // UI References
+    [SerializeField] public GameObject content;
+    [SerializeField] private GameObject objectPlacement;
+    [SerializeField] private GameObject objectScale;
+    [SerializeField] private GameObject saveLoad;
+    [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
+    Color defaultColor;
 
+
+    #region Unity Methods
     private void Awake()
     {
         current = this;
@@ -43,13 +53,29 @@ public class BuildingSystem : MonoBehaviour
 
     private void Update()
     {
+        // Checks if left mouse clicked
         if (Input.GetMouseButtonDown(0))
         {
-            if (Time.time - lastClickTime < doubleClickTime)
+            // Checks for double-click to place object
+            if (IsDoubleClick())
             {
+                if(objectToPlace != null)
+                {   
+                    // Checks if valid placement
+                    if(CanBePlaced(objectToPlace))
+                    {
+                        objectToPlace.Place();
+                        Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                        TakeArea(start, objectToPlace.Size);
+
+                    }
+                }
+            }
+            else
+            {
+                // Single click selects the object
                 SelectObject();
             }
-            lastClickTime = Time.time;
         }
 
 
@@ -88,8 +114,8 @@ public class BuildingSystem : MonoBehaviour
             Destroy(objectToPlace.gameObject);
         }
     }
-
         #endregion
+
 
         #region Utils
 
@@ -135,6 +161,13 @@ public class BuildingSystem : MonoBehaviour
         
     }
 
+    private bool IsDoubleClick()
+    {
+        bool isDouble = Time.time - lastClickTime < doubleClickTime;
+        lastClickTime = Time.time;
+        return isDouble;
+    }
+
     #endregion
 
     #region Building Placement
@@ -169,14 +202,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    [SerializeField] public GameObject content;
-    [SerializeField] private GameObject objectPlacement;
-    [SerializeField] private GameObject objectScale;
-    [SerializeField] private GameObject saveLoad;
-    [SerializeField] private GameObject homeBtn;
-    [SerializeField] private GameObject trashBtn;
-    Color defaultColor;
-
+   
     private void unhighlightButtons()
     {
         objectPlacement.SetActive(false);
@@ -215,36 +241,30 @@ public class BuildingSystem : MonoBehaviour
         unhighlightButtons();
     }
 
+
     public void InitializeWithObject(GameObject prefab)
     {
-        // Snap the position to the grid
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
-        // Instantiate the object
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
 
-        // Calculate the Y-offset dynamically based on the object's bounds
         Renderer renderer = obj.GetComponent<Renderer>();
         if (renderer != null)
         {
-            position.y += renderer.bounds.extents.y + 0.8f; // Half the height of the object + 0.8f
+            position.y += renderer.bounds.extents.y + 0.8f;
         }
         else
         {
-            position.y += 0.8f; // Default offset if no renderer is found
+            position.y += 0.8f; 
         }
 
-        // Apply the adjusted position
         obj.transform.position = position;
 
-        // Set up the object for placement
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
 
-        // Mark the object as selected
         Selected = obj;
 
-        // Update UI buttons
         unhighlightButtons();
     }
     private bool CanBePlaced(PlaceableObject placeableObject)
