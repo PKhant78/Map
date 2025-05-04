@@ -16,6 +16,7 @@ public class BuildingSystem : MonoBehaviour
     [SerializeField] private Tilemap MainTilemap;
     [SerializeField] private TileBase whiteTile;
 
+
     // Prefabs & Objects
     public GameObject prefab1;
     public GameObject prefab2;
@@ -239,6 +240,7 @@ public class BuildingSystem : MonoBehaviour
         defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
 
         unhighlightButtons();
+  
     }
 
 
