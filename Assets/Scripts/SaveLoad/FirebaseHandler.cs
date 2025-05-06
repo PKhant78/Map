@@ -32,6 +32,8 @@ public class FirebaseHandler : MonoBehaviour
         {
             Destroy(obj);
         }
+
+        BuildingSystem.ObjectCount = 0;
     }
     
     private string Serialize(GameObjectData[] items, bool prettyPrint = false) {
@@ -68,14 +70,31 @@ public class FirebaseHandler : MonoBehaviour
         else onResult?.Invoke(null);
     }
 
+    private bool EnvironmentExistsInDB(string name) {
+        bool res = false;
+        StartCoroutine(QueryEnvironmentByName(name, (DataSnapshot snapshot) => {
+            if (snapshot != null) res = true;
+        }));
+
+        return res;
+    }
+
     public void LoadEnvironment(int slot) {
+        // "author-name" is a placeholder
+        string envName = "author-name#" + slot;
+
+        if (!EnvironmentExistsInDB(envName) && slot != 0) {
+            Debug.LogWarning("No data found in DB while looking for \"root/Environments/" + envName + "/\"");
+            return;
+        }
+
         // Reset environment builder
         DestroyObjects();
         BuildingSystem.ObjectCount = 0;
 
-        // "author-name" is a placeholder
-        string envName = "author-name#" + slot;
-
+        if (slot == 0) return;
+        
+        else
         StartCoroutine(QueryEnvironmentByName(envName, (DataSnapshot snapshot) => {
             if (snapshot != null) {
                 // Get the data from Firebase and parse it into an Environment object
