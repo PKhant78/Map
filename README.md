@@ -58,4 +58,3 @@ Please make sure to update tests as appropriate.
 ## Acknowledegments
 
 - MRCane Team
-- StandaloneFileBrowser (plugin)
