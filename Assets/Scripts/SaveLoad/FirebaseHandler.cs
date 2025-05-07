@@ -54,8 +54,8 @@ public class FirebaseHandler : MonoBehaviour
         // Serialize Environment data to a single JSON
         string json = Serialize(objectData.ToArray());
 
-        // Save JSON to Database; "author-name" is a placeholder
-        root.Child("Environments").Child("author-name#" + slot).SetRawJsonValueAsync(json);
+        // Save JSON to Database; "authorname" is a placeholder
+        root.Child("Environments").Child("authorname-SLOT" + slot).SetRawJsonValueAsync(json);
     }
 
     private IEnumerator QueryEnvironmentByName(string name, Action<DataSnapshot> onResult) {
@@ -71,17 +71,17 @@ public class FirebaseHandler : MonoBehaviour
     }
 
     private bool EnvironmentExistsInDB(string name) {
-        bool res = false;
+        bool res = true;
         StartCoroutine(QueryEnvironmentByName(name, (DataSnapshot snapshot) => {
-            if (snapshot != null) res = true;
+            if (snapshot == null) res = false;
         }));
 
         return res;
     }
 
     public void LoadEnvironment(int slot) {
-        // "author-name" is a placeholder
-        string envName = "author-name#" + slot;
+        // "authorname" is a placeholder
+        string envName = "authorname-SLOT" + slot;
 
         if (!EnvironmentExistsInDB(envName) && slot != 0) {
             Debug.LogWarning("No data found in DB while looking for \"root/Environments/" + envName + "/\"");
