@@ -31,6 +31,9 @@ public class BuildingSystem : MonoBehaviour
     size currentSize = size.small;
 
     private PlaceableObject objectToPlace;
+    public static int ObjectCount = 0;
+
+    #region Unity Methods
 
     // UI References
     [SerializeField] public GameObject content;
@@ -153,7 +156,7 @@ public class BuildingSystem : MonoBehaviour
         return isDouble;
     }
 
-    #endregion
+    #endregion // Utils
 
     #region Building Placement
 
@@ -222,6 +225,7 @@ public class BuildingSystem : MonoBehaviour
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+        obj.name = prefab.name + " #" + ObjectCount++;
 
         Renderer renderer = obj.GetComponent<Renderer>();
         if (renderer != null)
@@ -305,5 +309,6 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    #endregion
+   
 }
+ #endregion
