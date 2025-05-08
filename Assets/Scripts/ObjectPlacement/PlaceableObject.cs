@@ -9,7 +9,7 @@ public class PlaceableObject : MonoBehaviour
     public string prefabName;
     public Vector3Int Size { get; private set; }
     private Vector3[] Vertices;
-    private Renderer objectRenderer;  
+    private Renderer objectRenderer;
     private static List<PlaceableObject> allPlaceableObjects = new List<PlaceableObject>();
     private Color originalColor;
     private Material defaultMaterial;
@@ -68,7 +68,7 @@ public class PlaceableObject : MonoBehaviour
     {
         GetColliderVertexPositionsLocal();
         CalculateSizeInCells();
-        
+
         InitializeRenderer();
         ObjectColors();
     }
@@ -79,13 +79,13 @@ public class PlaceableObject : MonoBehaviour
         if (objectRenderer == null)
         {
             objectRenderer = GetComponentInChildren<Renderer>();
-            
+
             if (objectRenderer == null)
             {
                 objectRenderer = gameObject.AddComponent<MeshRenderer>();
                 defaultMaterial = new Material(Shader.Find("Standard"));
                 objectRenderer.material = defaultMaterial;
-                
+
                 defaultMaterial.SetFloat("_Mode", 3);
                 defaultMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 defaultMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -101,7 +101,7 @@ public class PlaceableObject : MonoBehaviour
     {
         if (!Placed)
         {
-            ObjectColors(); 
+            ObjectColors();
         }
     }
 
@@ -121,11 +121,11 @@ public class PlaceableObject : MonoBehaviour
 
     public void Place()
     {
-        if (IsOverlapping())
-        {
-            Debug.LogWarning("Cannot place object here - Overlapping with another object.");
-            return;
-        }
+        //if (IsOverlapping())
+        //{
+        //    Debug.LogWarning("Cannot place object here - Overlapping with another object.");
+        //    return;
+        //}
 
         ObjectDrag drag = gameObject.GetComponent<ObjectDrag>();
         Destroy(drag);
@@ -143,36 +143,33 @@ public class PlaceableObject : MonoBehaviour
     }
 
     public void ObjectColors()
-{
-    if (objectRenderer == null)
     {
-        InitializeRenderer();
-    }
+        if (objectRenderer == null)
+        {
+            InitializeRenderer();
+        }
 
-    GameObject selectedObject = BuildingSystem.current?.Selected;
-    if (Placed)
-    {
-        if (selectedObject == gameObject)
+        GameObject selectedObject = BuildingSystem.current?.Selected;
+
+        if (Placed)
         {
-            SetColor(new Color(0, 1, 0, 1)); 
-        }
-        if(selectedObject != gameObject)
-        {
-            SetColor(originalColor); 
-        }
-    }
-    else
-    {
-        if (IsOverlapping())
-        {
-            SetColor(new Color(1, 0, 0, 0.5f)); // Red for overlapping
+            if(selectedObject != gameObject)
+                SetColor(originalColor);
+            if (selectedObject == gameObject)
+            {
+                SetColor(new Color(0, 1, 0, 1)); // Green for selected objects
+            }
         }
         else
         {
-            SetColor(new Color(0, 1, 0, 0.5f)); // Add this line to set green for valid placement
+            // if (IsOverlapping(this.gameObject))
+            // {
+            //     SetColor(new Color(1, 0, 0, 0.5f)); // Red for invalid placement
+            // }
+            SetColor(new Color(0, 1, 0, 0.5f)); // Green for valid placement
         }
     }
-}
+
     public void SetColor(Color color)
     {
         if (objectRenderer is MeshRenderer meshRenderer)
@@ -220,7 +217,7 @@ public class PlaceableObject : MonoBehaviour
         {
             BuildingSystem.current.Selected = null;
         }
-        
+
         UpdateAllObjectColors();
     }
 
@@ -244,24 +241,120 @@ public class PlaceableObject : MonoBehaviour
         }
     }
 
-    private bool IsOverlapping()
-    {
-        Collider collider = GetComponent<Collider>();
-        if (collider == null)
-        {
-            Debug.LogWarning($"No Collider found on {gameObject.name}. Cannot check for overlaps.");
-            return false;
-        }
+    // private bool IsOverlapping()
+    // {
+    //     // Get the collider
+    //     Collider collider = GetComponent<Collider>();
+    //     if (collider == null)
+    //     {
+    //         return false;
+    //     }
 
-        Collider[] colliders = Physics.OverlapBox(transform.position, collider.bounds.extents, transform.rotation, LayerMask.GetMask("PlaceableObject"));
-        foreach (Collider otherCollider in colliders)
-        {
-            if (otherCollider.gameObject != gameObject) // Ignore self
-            {
-                return true; // Overlap detected
-            }
-        }
-        return false; // No overlap
-    }
+    // //     Vector3 checkSize = collider.bounds.extents * 0.9f;
+
+    // //     // Get all colliders in the area
+    // //     Collider[] colliders = Physics.OverlapBox(
+    // //         transform.position,         // Center point of the box
+    // //         checkSize,                  // Half-extents of the box (half the size in each dimension)
+    // //         transform.rotation,         // Rotation of the box
+    // //         ~0                          // Check ALL layers initially for debugging
+    // //     );
+
+    // //     // Log all found colliders for debugging
+    // //     foreach (Collider otherCollider in colliders)
+    // //     {
+    // //         Debug.Log($"Overlapping with: {otherCollider.gameObject.name} on layer {LayerMask.LayerToName(otherCollider.gameObject.layer)}");
+
+    // //         if (otherCollider.gameObject != gameObject)
+    // //         {
+    // //             // Collision found with something other than self
+    // //             return true;
+    // //         }
+    // //     }
+    // //     return false; // No overlap
+    // // }
+
+    // private bool IsOverlapping(GameObject excludeObject)
+    // {
+    //     // Get the collider
+    //     Collider collider = GetComponent<Collider>();
+    //     if (collider == null)
+    //     {
+    //         Debug.LogWarning($"No Collider found on {gameObject.name}. Cannot check for overlaps.");
+    //         return false;
+    //     }
+
+    //     Vector3 checkSize = collider.bounds.extents * 0.9f;
+
+    //     // Get all colliders in the area
+    //     Collider[] colliders = Physics.OverlapBox(
+    //         transform.position,         // Center point of the box
+    //         checkSize,                  // Half-extents of the box (half the size in each dimension)
+    //         transform.rotation,         // Rotation of the box
+    //         ~0                          // Check ALL layers
+    //     );
+
+    //     foreach (Collider otherCollider in colliders)
+    //     {
+    //         // Exclude self, the specified object, and child objects
+    //         if (otherCollider.gameObject != gameObject &&
+    //             otherCollider.gameObject != excludeObject &&
+    //             !IsChildOf(otherCollider.gameObject, gameObject))
+    //         {
+    //             Debug.Log($"Overlapping with: {otherCollider.gameObject.name}");
+    //             return true;
+    //         }
+    //     }
+    //     return false; // No overlap
+    // }
+
+    // // Helper method to check if a GameObject is a child of another
+    // private bool IsChildOf(GameObject child, GameObject parent)
+    // {
+    //     Transform current = child.transform;
+    //     while (current != null)
+    //     {
+    //         if (current.gameObject == parent)
+    //         {
+    //             return true;
+    //         }
+    //         current = current.parent;
+    //     }
+    //     return false;
+    // }
+
+    // public List<GameObject> GetOverlappingObjects()
+    // {
+    //     List<GameObject> overlappingObjects = new List<GameObject>();
+
+    //     // Get the collider
+    //     Collider collider = GetComponent<Collider>();
+    //     if (collider == null)
+    //     {
+    //         return overlappingObjects;
+    //     }
+
+    //     Vector3 checkSize = collider.bounds.extents * 0.9f;
+
+    //     // Get all colliders in the area
+    //     Collider[] colliders = Physics.OverlapBox(
+    //         transform.position,         // Center point of the box
+    //         checkSize,                  // Half-extents of the box (half the size in each dimension)
+    //         transform.rotation,         // Rotation of the box
+    //         ~0                          // Check ALL layers
+    //     );
+
+    //     foreach (Collider otherCollider in colliders)
+    //     {
+    //         if (otherCollider.gameObject != gameObject &&
+    //             otherCollider.gameObject.tag != "Floor" &&
+    //             !IsChildOf(otherCollider.gameObject, gameObject))
+    //         {
+    //             overlappingObjects.Add(otherCollider.gameObject);
+    //         }
+    //     }
+
+    //     return overlappingObjects;
+    // }
 }
 

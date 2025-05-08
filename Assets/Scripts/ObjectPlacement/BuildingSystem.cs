@@ -235,7 +235,8 @@ public class BuildingSystem : MonoBehaviour
 
         Selected = obj;
 
-        objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
+        if (objectToPlace != null)
+            objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
 
         unhighlightButtons();
     }

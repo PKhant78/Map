@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -8577091858037029272}
   m_Layer: 0
   m_Name: WallPillar
-  m_TagString: Stone
+  m_TagString: PlaceableObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

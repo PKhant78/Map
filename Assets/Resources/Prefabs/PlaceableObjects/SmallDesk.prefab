@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5223813652817738857}
   m_Layer: 0
   m_Name: SmallDesk
-  m_TagString: Objects
+  m_TagString: PlaceableObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

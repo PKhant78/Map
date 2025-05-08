@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 6324432898613255070}
   m_Layer: 0
   m_Name: Column
-  m_TagString: Objects
+  m_TagString: PlaceableObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
