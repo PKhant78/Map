@@ -235,7 +235,7 @@ public class BuildingSystem : MonoBehaviour
 
         Selected = obj;
 
-        objectToPlace.SetTransparentGreen(); // Set the object to transparent green
+        objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
 
         unhighlightButtons();
     }

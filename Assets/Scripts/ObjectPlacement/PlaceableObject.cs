@@ -10,8 +10,9 @@ public class PlaceableObject : MonoBehaviour
     public Vector3Int Size { get; private set; }
     private Vector3[] Vertices;
     private Renderer objectRenderer;  
-    private static PlaceableObject lastPlacedObject;
     private static List<PlaceableObject> allPlaceableObjects = new List<PlaceableObject>();
+    private Color originalColor;
+    private Material defaultMaterial;
 
     private void Awake()
     {
@@ -21,11 +22,21 @@ public class PlaceableObject : MonoBehaviour
     private void OnDestroy()
     {
         allPlaceableObjects.Remove(this);
+
+        if (defaultMaterial != null)
+        {
+            Destroy(defaultMaterial);
+        }
     }
 
     private void GetColliderVertexPositionsLocal()
     {
         BoxCollider b = gameObject.GetComponent<BoxCollider>();
+        if (b == null)
+        {
+            Debug.LogError("BoxCollider not found on " + gameObject.name);
+            return;
+        }
         Vertices = new Vector3[4];
         Vertices[0] = b.center + new Vector3(-b.size.x, -b.size.y, -b.size.z) * 0.5f;
         Vertices[1] = b.center + new Vector3(b.size.x, -b.size.y, -b.size.z) * 0.5f;
@@ -72,10 +83,9 @@ public class PlaceableObject : MonoBehaviour
             if (objectRenderer == null)
             {
                 objectRenderer = gameObject.AddComponent<MeshRenderer>();
-                Material defaultMaterial = new Material(Shader.Find("Standard"));
+                defaultMaterial = new Material(Shader.Find("Standard"));
                 objectRenderer.material = defaultMaterial;
                 
-                // Configure material for transparency
                 defaultMaterial.SetFloat("_Mode", 3);
                 defaultMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 defaultMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -83,20 +93,15 @@ public class PlaceableObject : MonoBehaviour
                 defaultMaterial.renderQueue = 3000;
             }
         }
+
+        originalColor = objectRenderer.material.color;
     }
 
     private void Update()
     {
         if (!Placed)
         {
-            if (IsOverlapping())
-            {
-                SetColor(new Color(1, 0, 0, 0.5f)); // Transparent red for invalid placement
-            }
-            else
-            {
-                SetColor(new Color(0, 1, 0, 0.5f)); // Transparent green for valid placement
-            }
+            ObjectColors(); 
         }
     }
 
@@ -119,29 +124,56 @@ public class PlaceableObject : MonoBehaviour
         if (IsOverlapping())
         {
             Debug.LogWarning("Cannot place object here - Overlapping with another object.");
-            return; // Prevent placement
+            return;
         }
 
         ObjectDrag drag = gameObject.GetComponent<ObjectDrag>();
         Destroy(drag);
 
-        lastPlacedObject = this;
         Placed = true;
         gameObject.tag = "Selectable";
 
-        // Reset material to opaque
-        Material material = objectRenderer.material;
-        material.color = Color.white; // Default color
-        material.SetFloat("_Mode", 0);
-        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-        material.DisableKeyword("_ALPHABLEND_ON");
-        material.renderQueue = -1;
+        // Clear the selected object if this object is selected
+        if (BuildingSystem.current.Selected == gameObject)
+        {
+            BuildingSystem.current.Selected = null;
+        }
 
         UpdateAllObjectColors();
     }
 
-    private void SetColor(Color color)
+    public void ObjectColors()
+{
+    if (objectRenderer == null)
+    {
+        InitializeRenderer();
+    }
+
+    GameObject selectedObject = BuildingSystem.current?.Selected;
+    if (Placed)
+    {
+        if (selectedObject == gameObject)
+        {
+            SetColor(new Color(0, 1, 0, 1)); 
+        }
+        if(selectedObject != gameObject)
+        {
+            SetColor(originalColor); 
+        }
+    }
+    else
+    {
+        if (IsOverlapping())
+        {
+            SetColor(new Color(1, 0, 0, 0.5f)); // Red for overlapping
+        }
+        else
+        {
+            SetColor(new Color(0, 1, 0, 0.5f)); // Add this line to set green for valid placement
+        }
+    }
+}
+    public void SetColor(Color color)
     {
         if (objectRenderer is MeshRenderer meshRenderer)
         {
@@ -177,34 +209,9 @@ public class PlaceableObject : MonoBehaviour
         }
     }
 
-    private void SetOutlineColor(Color outlineColor)
-    {
-        if (objectRenderer is MeshRenderer meshRenderer)
-        {
-            foreach (Material material in meshRenderer.materials)
-            {
-                if (material.HasProperty("_Outline_Color"))
-                {
-                    material.SetColor("_Outline_Color", outlineColor); // Update only the outline color
-                }
-            }
-        }
-        else if (objectRenderer is SkinnedMeshRenderer skinnedMeshRenderer)
-        {
-            foreach (Material material in skinnedMeshRenderer.materials)
-            {
-                if (material.HasProperty("_Outline_Color"))
-                {
-                    material.SetColor("_Outline_Color", outlineColor); // Update only the outline color
-                }
-            }
-        }
-    }
-
     public void UpdateState(bool isPlaced, bool isSelected)
     {
         Placed = isPlaced;
-        
         if (isSelected)
         {
             BuildingSystem.current.Selected = gameObject;
@@ -237,75 +244,24 @@ public class PlaceableObject : MonoBehaviour
         }
     }
 
-    public void ObjectColors()
-    {
-        if (objectRenderer == null)
-        {
-            InitializeRenderer();
-            if (objectRenderer == null)
-            {
-                Debug.LogError($"Cannot set colors - No Renderer on {gameObject.name}");
-                return;
-            }
-        }
-
-        try
-        {
-            if (BuildingSystem.current == null)
-            {
-                return;
-            }
-
-            if (IsOverlapping())
-            {
-                SetOutlineColor(new Color(1, 0, 0, 1)); // Red outline for invalid placement
-            }
-            else if (BuildingSystem.current.Selected == gameObject)
-            {
-                SetOutlineColor(new Color(0, 1, 0, 1)); // Green outline for selected
-            }
-            else if (Placed)
-            {
-                SetOutlineColor(new Color(1, 1, 0, 1)); // Yellow outline for already placed
-            }
-            else
-            {
-                SetOutlineColor(new Color(1, 0, 0, 1)); // Red outline for can't place
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error in ObjectColors for {gameObject.name}: {e.Message}");
-        }
-    }
-
     private bool IsOverlapping()
     {
-        Collider[] colliders = Physics.OverlapBox(transform.position, GetComponent<Collider>().bounds.extents, transform.rotation, LayerMask.GetMask("PlaceableObject"));
-        foreach (Collider collider in colliders)
+        Collider collider = GetComponent<Collider>();
+        if (collider == null)
         {
-            if (collider.gameObject != gameObject) // Ignore self
+            Debug.LogWarning($"No Collider found on {gameObject.name}. Cannot check for overlaps.");
+            return false;
+        }
+
+        Collider[] colliders = Physics.OverlapBox(transform.position, collider.bounds.extents, transform.rotation, LayerMask.GetMask("PlaceableObject"));
+        foreach (Collider otherCollider in colliders)
+        {
+            if (otherCollider.gameObject != gameObject) // Ignore self
             {
                 return true; // Overlap detected
             }
         }
         return false; // No overlap
-    }
-
-    public void SetTransparentGreen()
-    {
-        if (objectRenderer == null)
-        {
-            InitializeRenderer();
-        }
-
-        Material material = objectRenderer.material;
-        material.color = new Color(0, 1, 0, 0.5f); // Transparent green
-        material.SetFloat("_Mode", 3);
-        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        material.EnableKeyword("_ALPHABLEND_ON");
-        material.renderQueue = 3000;
     }
 }
 
