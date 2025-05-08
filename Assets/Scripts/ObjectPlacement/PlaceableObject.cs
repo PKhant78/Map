@@ -87,7 +87,17 @@ public class PlaceableObject : MonoBehaviour
 
     private void Update()
     {
-        ObjectColors();
+        if (!Placed)
+        {
+            if (IsOverlapping())
+            {
+                SetColor(new Color(1, 0, 0, 0.5f)); // Transparent red for invalid placement
+            }
+            else
+            {
+                SetColor(new Color(0, 1, 0, 0.5f)); // Transparent green for valid placement
+            }
+        }
     }
 
     public void Rotate()
@@ -118,6 +128,15 @@ public class PlaceableObject : MonoBehaviour
         lastPlacedObject = this;
         Placed = true;
         gameObject.tag = "Selectable";
+
+        // Reset material to opaque
+        Material material = objectRenderer.material;
+        material.color = Color.white; // Default color
+        material.SetFloat("_Mode", 0);
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+        material.DisableKeyword("_ALPHABLEND_ON");
+        material.renderQueue = -1;
 
         UpdateAllObjectColors();
     }
@@ -271,6 +290,22 @@ public class PlaceableObject : MonoBehaviour
             }
         }
         return false; // No overlap
+    }
+
+    public void SetTransparentGreen()
+    {
+        if (objectRenderer == null)
+        {
+            InitializeRenderer();
+        }
+
+        Material material = objectRenderer.material;
+        material.color = new Color(0, 1, 0, 0.5f); // Transparent green
+        material.SetFloat("_Mode", 3);
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        material.EnableKeyword("_ALPHABLEND_ON");
+        material.renderQueue = 3000;
     }
 }
 
