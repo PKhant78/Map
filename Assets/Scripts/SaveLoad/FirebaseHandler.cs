@@ -70,23 +70,10 @@ public class FirebaseHandler : MonoBehaviour
         else onResult?.Invoke(null);
     }
 
-    private bool EnvironmentExistsInDB(string name) {
-        bool res = true;
-        StartCoroutine(QueryEnvironmentByName(name, (DataSnapshot snapshot) => {
-            if (snapshot == null) res = false;
-        }));
-
-        return res;
-    }
-
+    // slot = 0 -> load nothing
     public void LoadEnvironment(int slot) {
         // "authorname" is a placeholder
         string envName = "authorname-SLOT" + slot;
-
-        if (!EnvironmentExistsInDB(envName) && slot != 0) {
-            Debug.LogWarning("No data found in DB while looking for \"root/Environments/" + envName + "/\"");
-            return;
-        }
 
         // Reset environment builder
         DestroyObjects();
