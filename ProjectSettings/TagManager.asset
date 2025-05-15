@@ -7,6 +7,11 @@ TagManager:
   - Objects
   - NoMaterial
   - Selectable
+  - Plastic
+  - Ceramic
+  - Stone
+  - Wood
+  - PlaceableObject
   layers:
   - Default
   - TransparentFX
