@@ -11,29 +11,44 @@ using UnityEngine.UIElements;
 public class BuildingSystem : MonoBehaviour
 {
     public static BuildingSystem current;
-
     public GridLayout gridLayout;
-    private Grid grid;
+    public Grid grid;
     [SerializeField] private Tilemap MainTilemap;
     [SerializeField] private TileBase whiteTile;
 
+    // Prefabs & Objects
     public GameObject prefab1;
     public GameObject prefab2;
+    public GameObject Selected;
 
-    public GameObject Selected; // Line added by Bryan
+    // Input Settings
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
 
-
-    public enum size { small, medium, large}
+    // Scaling Objects
+    public enum size { small, medium, large }
     public UnityEngine.UI.Slider scaleSlider;
-
     size currentSize = size.small;
 
-
     private PlaceableObject objectToPlace;
+    public static int ObjectCount = 0;
 
     #region Unity Methods
+
+    // UI References
+    [SerializeField] public GameObject content;
+    [SerializeField] private GameObject objectPlacement;
+    [SerializeField] private GameObject objectScale;
+    [SerializeField] private GameObject saveLoad;
+    [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
+    Color defaultColor;
+
+    // PlacementSystem Fields
+    [SerializeField] private GameObject mouseIndicator;
+    [SerializeField] private InputManager inputManager;
+    [SerializeField] private GameObject gridVisualization;
+    [SerializeField] private GameObject SelectionBox;
 
     private void Awake()
     {
@@ -41,22 +56,54 @@ public class BuildingSystem : MonoBehaviour
         grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
+    private void OnDestroy()
+    {
+        if (inputManager != null)
+            inputManager.OnExit -= Deselect;
+    }
+
+    private void Start()
+    {
+        Transform transformBtn = content.transform.GetChild(0);
+        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
+        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
+
+        if (scaleSlider != null)
+            scaleSlider.onValueChanged.AddListener(UpdateScale);
+
+        if (inputManager != null)
+            inputManager.OnExit += Deselect;
+
+        unhighlightButtons();
+
+    }
+
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !inputManager.IsPointerOverUI())
         {
-            if (Time.time - lastClickTime < doubleClickTime)
+            if (IsDoubleClick())
+            {
+                if (objectToPlace != null && CanBePlaced(objectToPlace))
+                {
+                    objectToPlace.Place();
+                    Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                    TakeArea(start, objectToPlace.Size);
+                    objectToPlace = null;
+                    Selected = null;
+                    lastClickTime = 0f;
+                    unhighlightButtons();
+                }
+            }
+            else
             {
                 SelectObject();
             }
-            lastClickTime = Time.time;
         }
-
 
         if (scaleSlider != null && objectToPlace != null)
         {
             scaleSlider.value = objectToPlace.transform.localScale.x;
-            scaleSlider.onValueChanged.AddListener(UpdateScale);
         }
 
         if (!objectToPlace)
@@ -64,36 +111,18 @@ public class BuildingSystem : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length);
-            changeSize(currentSize);
-        }
+        Vector3 mousePosition = inputManager.GetSelectedMapPosition();
+        Vector3Int gridPosition = grid.WorldToCell(mousePosition);
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (mouseIndicator != null)
         {
-            if (CanBePlaced(objectToPlace))
-            {
-                objectToPlace.Place();
-                Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
-                TakeArea(start, objectToPlace.Size);
-            }
-            else
-            {
-                Destroy(objectToPlace.gameObject);
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Destroy(objectToPlace.gameObject);
+            mouseIndicator.transform.position = grid.GetCellCenterWorld(gridPosition);
         }
     }
 
-        #endregion
+    #region Utils
 
-        #region Utils
-
-        public static Vector3 GetMouseWorldPosition()
+    public static Vector3 GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
@@ -106,7 +135,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    public Vector3 SnapCoordinationToGrid (Vector3 position)
+    public Vector3 SnapCoordinationToGrid(Vector3 position)
     {
         Vector3Int cellPos = gridLayout.WorldToCell(position);
         position = grid.GetCellCenterWorld(cellPos);
@@ -124,21 +153,28 @@ public class BuildingSystem : MonoBehaviour
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
         int counter = 0;
 
-        foreach (var v in area.allPositionsWithin) {
-            Vector3Int pos = new Vector3Int(v.x, v.y, z:0);
+        foreach (var v in area.allPositionsWithin)
+        {
+            Vector3Int pos = new Vector3Int(v.x, v.y, z: 0);
 
             array[counter] = tilemap.GetTile(pos);
             counter++;
         }
 
         return array;
-        
     }
 
-    #endregion
+    private bool IsDoubleClick()
+    {
+        bool isDouble = Time.time - lastClickTime < doubleClickTime;
+        lastClickTime = Time.time;
+        return isDouble;
+    }
+
+    #endregion // Utils
 
     #region Building Placement
-    // Lines added by Bryan
+
     public void RotateSelected()
     {
         if (Selected) objectToPlace.Rotate();
@@ -148,8 +184,9 @@ public class BuildingSystem : MonoBehaviour
     {
         if (Selected)
         {
-            Destroy(objectToPlace.gameObject);
+            Destroy(Selected);
             Selected = null;
+            objectToPlace = null;
             unhighlightButtons();
         }
     }
@@ -161,21 +198,14 @@ public class BuildingSystem : MonoBehaviour
             if (CanBePlaced(objectToPlace))
             {
                 objectToPlace.Place();
-                Selected = null;
-                unhighlightButtons();
                 Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
                 TakeArea(start, objectToPlace.Size);
+                Selected = null;
+                objectToPlace = null;
+                unhighlightButtons();
             }
         }
     }
-
-    [SerializeField] public GameObject content;
-    [SerializeField] private GameObject objectPlacement;
-    [SerializeField] private GameObject objectScale;
-    [SerializeField] private GameObject saveLoad;
-    [SerializeField] private GameObject homeBtn;
-    [SerializeField] private GameObject trashBtn;
-    Color defaultColor;
 
     private void unhighlightButtons()
     {
@@ -191,6 +221,7 @@ public class BuildingSystem : MonoBehaviour
                 btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
         }
     }
+
     private void highlightButtons()
     {
         objectPlacement.SetActive(true);
@@ -206,27 +237,31 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        Transform transformBtn = content.transform.GetChild(0);
-        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
-        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
-
-        unhighlightButtons();
-    }
-
     public void InitializeWithObject(GameObject prefab)
     {
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+        obj.name = prefab.name + " #" + ObjectCount++;
+
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            position.y += renderer.bounds.extents.y;
+        }
+        obj.transform.position = position;
+
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
 
-        // Lines added by Bryan
         Selected = obj;
-        unhighlightButtons();
+
+        if (objectToPlace != null)
+            objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
+
+        highlightButtons();
     }
+
     private bool CanBePlaced(PlaceableObject placeableObject)
     {
         BoundsInt area = new BoundsInt();
@@ -244,8 +279,11 @@ public class BuildingSystem : MonoBehaviour
         }
         return true;
     }
+
     private void SelectObject()
     {
+        if (ClickToDelete.IsDeleteModeActive) return;
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
@@ -253,20 +291,32 @@ public class BuildingSystem : MonoBehaviour
         {
             Selected = hit.collider.gameObject;
             objectToPlace = Selected.GetComponent<PlaceableObject>();
-            Debug.Log(Selected);
-            Selected.AddComponent<ObjectDrag>();
+            // Reset Placed so double-click doesn't re-trigger Place() immediately,
+            // and so the object can be freely moved again before re-confirming placement.
+            objectToPlace.UpdateState(false, true);
+            // Avoid adding duplicate ObjectDrag components on repeated clicks.
+            if (Selected.GetComponent<ObjectDrag>() == null)
+            {
+                Selected.AddComponent<ObjectDrag>();
+            }
             Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
             UnfillArea(start, objectToPlace.Size);
             highlightButtons();
         }
+    }
 
-
+    public void Deselect()
+    {
+        Selected = null;
+        objectToPlace = null;
+        unhighlightButtons();
     }
 
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
+
     public void UnfillArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
@@ -291,5 +341,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    #endregion
+   
 }
+#endregion
+#endregion 
