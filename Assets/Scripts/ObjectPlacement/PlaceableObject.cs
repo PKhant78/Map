@@ -131,7 +131,7 @@ public class PlaceableObject : MonoBehaviour
         Destroy(drag);
 
         Placed = true;
-        gameObject.tag = "Selectable";
+        gameObject.tag = "PlaceableObject";
 
         // Clear the selected object if this object is selected
         if (BuildingSystem.current.Selected == gameObject)

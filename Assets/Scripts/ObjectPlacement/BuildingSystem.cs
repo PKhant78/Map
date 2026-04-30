@@ -165,12 +165,19 @@ public class BuildingSystem : MonoBehaviour
         if (Selected) objectToPlace.Rotate();
     }
 
+    public void ClearObjectToPlace()
+    {
+        objectToPlace = null;
+        unhighlightButtons();
+    }
+
     public void DestroySelected()
     {
         if (Selected)
         {
             Destroy(objectToPlace.gameObject);
             Selected = null;
+            objectToPlace = null;
             unhighlightButtons();
         }
     }
@@ -268,7 +275,7 @@ public class BuildingSystem : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("PlaceableObject"))
         {
             Selected = hit.collider.gameObject;
             objectToPlace = Selected.GetComponent<PlaceableObject>();
