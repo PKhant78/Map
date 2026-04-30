@@ -10,23 +10,27 @@ public class ClickToDelete : MonoBehaviour
     {
 
     }
-
+    
     // Update is called once per frame
-    void Update()
+   void Update()
+{
+    if (Input.GetMouseButtonDown(0))
     {
-        if (Input.GetMouseButtonDown(0))
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            GameObject objectToDelete = hit.collider.gameObject;
+            if (deleteTool.activeSelf && objectToDelete.tag == "PlaceableObject")
             {
-                if (Input.GetMouseButtonDown(0))
+                if (BuildingSystem.current.Selected == objectToDelete)
                 {
-                    GameObject objectToDelete = hit.collider.gameObject;
-                    if (deleteTool.activeSelf && objectToDelete.tag == "Selectable")
-                        Destroy(objectToDelete);
+                    BuildingSystem.current.Selected = null;
                 }
+                Destroy(objectToDelete);
+                BuildingSystem.current.ClearObjectToPlace();
             }
         }
     }
+}
 }
