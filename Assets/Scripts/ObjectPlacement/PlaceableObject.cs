@@ -150,23 +150,20 @@ public class PlaceableObject : MonoBehaviour
         }
 
         GameObject selectedObject = BuildingSystem.current?.Selected;
+        bool isSelected = selectedObject == gameObject;
+
+        Debug.Log($"[ObjectColors] {gameObject.name}: Placed={Placed}, isSelected={isSelected}, renderer={objectRenderer?.name ?? "NULL"}");
 
         if (Placed)
         {
-            if(selectedObject != gameObject)
+            if (isSelected)
+                SetColor(new Color(0, 1, 0, 1));
+            else
                 SetColor(originalColor);
-            if (selectedObject == gameObject)
-            {
-                SetColor(new Color(0, 1, 0, 1)); // Green for selected objects
-            }
         }
         else
         {
-            // if (IsOverlapping(this.gameObject))
-            // {
-            //     SetColor(new Color(1, 0, 0, 0.5f)); // Red for invalid placement
-            // }
-            SetColor(new Color(0, 1, 0, 0.5f)); // Green for valid placement
+            SetColor(new Color(0, 1, 0, 0.5f));
         }
     }
 
@@ -357,4 +354,3 @@ public class PlaceableObject : MonoBehaviour
     //     return overlappingObjects;
     // }
 }
-

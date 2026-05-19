@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1046689014694",
+    "firebase_url": "https://final-project-7270d-default-rtdb.firebaseio.com",
+    "project_id": "final-project-7270d",
+    "storage_bucket": "final-project-7270d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1046689014694:android:fc1fe9a5cefb04b186a567",
+        "android_client_info": {
+          "package_name": "com.PKT.EnvironBuild"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA21Y1r5w3MSigAcYyoqc74bI-wlKRVHHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1046689014694:android:268dd97d0c9892b486a567",
+        "android_client_info": {
+          "package_name": "com.bmcc.mrcane"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA21Y1r5w3MSigAcYyoqc74bI-wlKRVHHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
