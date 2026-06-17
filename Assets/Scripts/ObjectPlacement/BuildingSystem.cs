@@ -1,3 +1,325 @@
+// using System;
+// using System.Collections;
+// using System.Collections.Generic;
+// using Unity.VisualScripting;
+// using UnityEngine;
+// using UnityEngine.SearchService;
+// using UnityEngine.Tilemaps;
+// using UnityEngine.UI;
+// using UnityEngine.UIElements;
+
+// public class BuildingSystem : MonoBehaviour
+// {
+//     public static BuildingSystem current;
+//     public GridLayout gridLayout;
+//     public Grid grid;
+//     [SerializeField] private Tilemap MainTilemap;
+//     [SerializeField] private TileBase whiteTile;
+
+//     // Prefabs & Objects
+//     public GameObject prefab1;
+//     public GameObject prefab2;
+//     public GameObject Selected;
+
+//     // Input Settings
+//     private float doubleClickTime = 0.3f;
+//     private float lastClickTime = 0f;
+
+//     // Scaling Objects
+//     public enum size { small, medium, large }
+//     public UnityEngine.UI.Slider scaleSlider;
+//     size currentSize = size.small;
+
+//     private PlaceableObject objectToPlace;
+//     public static int ObjectCount = 0;
+
+//     #region Unity Methods
+
+//     // UI References
+//     [SerializeField] public GameObject content;
+//     [SerializeField] private GameObject objectPlacement;
+//     [SerializeField] private GameObject objectScale;
+//     [SerializeField] private GameObject saveLoad;
+//     [SerializeField] private GameObject homeBtn;
+//     [SerializeField] private GameObject trashBtn;
+//     Color defaultColor;
+
+//     // PlacementSystem Fields
+//     [SerializeField] private GameObject mouseIndicator;
+//     [SerializeField] private InputManager inputManager;
+//     [SerializeField] private GameObject gridVisualization;
+//     [SerializeField] private GameObject SelectionBox;
+
+//     private void Awake()
+//     {
+//         current = this;
+//         grid = gridLayout.gameObject.GetComponent<Grid>();
+//     }
+
+//     private void Start()
+//     {
+//         Transform transformBtn = content.transform.GetChild(0);
+//         UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
+//         defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
+
+//         unhighlightButtons();
+
+//     }
+
+//     private void Update()
+//     {
+//         if (Input.GetMouseButtonDown(0))
+//         {
+//             if (IsDoubleClick())
+//             {
+//                 if (objectToPlace != null && CanBePlaced(objectToPlace))
+//                 {
+//                     objectToPlace.Place();
+//                     Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+//                     TakeArea(start, objectToPlace.Size);
+//                 }
+//             }
+//             else
+//             {
+//                 SelectObject();
+//             }
+//         }
+
+//         if (scaleSlider != null && objectToPlace != null)
+//         {
+//             scaleSlider.value = objectToPlace.transform.localScale.x;
+//             scaleSlider.onValueChanged.AddListener(UpdateScale);
+//         }
+
+//         if (!objectToPlace)
+//         {
+//             return;
+//         }
+
+//         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
+//         Vector3Int gridPosition = grid.WorldToCell(mousePosition);
+
+//         if (mouseIndicator != null)
+//         {
+//             mouseIndicator.transform.position = grid.GetCellCenterWorld(gridPosition);
+//         }
+//     }
+
+//     #region Utils
+
+//     public static Vector3 GetMouseWorldPosition()
+//     {
+//         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+//         if (Physics.Raycast(ray, out RaycastHit raycastHit))
+//         {
+//             return raycastHit.point;
+//         }
+//         else
+//         {
+//             return Vector3.zero;
+//         }
+//     }
+
+//     public Vector3 SnapCoordinationToGrid(Vector3 position)
+//     {
+//         Vector3Int cellPos = gridLayout.WorldToCell(position);
+//         position = grid.GetCellCenterWorld(cellPos);
+//         return position;
+//     }
+
+//     private void UpdateScale(float newScale)
+//     {
+//         Vector3 currentScale = objectToPlace.transform.localScale;
+//         objectToPlace.transform.localScale = new Vector3(newScale, currentScale.y, currentScale.z);
+//     }
+
+//     private static TileBase[] GetTilesBlock(BoundsInt area, Tilemap tilemap)
+//     {
+//         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
+//         int counter = 0;
+
+//         foreach (var v in area.allPositionsWithin)
+//         {
+//             Vector3Int pos = new Vector3Int(v.x, v.y, z: 0);
+
+//             array[counter] = tilemap.GetTile(pos);
+//             counter++;
+//         }
+
+//         return array;
+//     }
+
+//     private bool IsDoubleClick()
+//     {
+//         bool isDouble = Time.time - lastClickTime < doubleClickTime;
+//         lastClickTime = Time.time;
+//         return isDouble;
+//     }
+
+//     #endregion // Utils
+
+//     #region Building Placement
+
+//     public void RotateSelected()
+//     {
+//         if (Selected) objectToPlace.Rotate();
+//     }
+
+//     public void ClearObjectToPlace()
+//     {
+//         objectToPlace = null;
+//         unhighlightButtons();
+//     }
+
+//     public void DestroySelected()
+//     {
+//         if (Selected)
+//         {
+//             Destroy(objectToPlace.gameObject);
+//             Selected = null;
+//             objectToPlace = null;
+//             unhighlightButtons();
+//         }
+//     }
+
+//     public void PlaceSelected()
+//     {
+//         if (Selected)
+//         {
+//             if (CanBePlaced(objectToPlace))
+//             {
+//                 objectToPlace.Place();
+//                 Selected = null;
+//                 unhighlightButtons();
+//                 Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+//                 TakeArea(start, objectToPlace.Size);
+//             }
+//         }
+//     }
+
+//     private void unhighlightButtons()
+//     {
+//         objectPlacement.SetActive(false);
+//         objectScale.SetActive(false);
+//         saveLoad.SetActive(true);
+//         homeBtn.SetActive(true);
+//         trashBtn.SetActive(true);
+//         foreach (Transform child in content.transform)
+//         {
+//             UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
+//             if (btn != null)
+//                 btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
+//         }
+//     }
+
+//     private void highlightButtons()
+//     {
+//         objectPlacement.SetActive(true);
+//         objectScale.SetActive(true);
+//         saveLoad.SetActive(false);
+//         homeBtn.SetActive(false);
+//         trashBtn.SetActive(false);
+//         foreach (Transform child in content.transform)
+//         {
+//             UnityEngine.UI.Button btn = child.GetComponent<UnityEngine.UI.Button>();
+//             if (btn != null)
+//                 btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
+//         }
+//     }
+
+//     public void InitializeWithObject(GameObject prefab)
+//     {
+//         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
+
+//         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+//         obj.name = prefab.name + " #" + ObjectCount++;
+
+//         Renderer renderer = obj.GetComponent<Renderer>();
+//         if (renderer != null)
+//         {
+//             position.y += renderer.bounds.extents.y;
+//         }
+//         obj.transform.position = position;
+
+//         objectToPlace = obj.GetComponent<PlaceableObject>();
+//         obj.AddComponent<ObjectDrag>();
+
+//         Selected = obj;
+
+//         if (objectToPlace != null)
+//             objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
+
+//         unhighlightButtons();
+//     }
+
+//     private bool CanBePlaced(PlaceableObject placeableObject)
+//     {
+//         BoundsInt area = new BoundsInt();
+//         area.position = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+//         area.size = placeableObject.Size;
+
+//         TileBase[] baseArray = GetTilesBlock(area, MainTilemap);
+
+//         foreach (var b in baseArray)
+//         {
+//             if (b == whiteTile)
+//             {
+//                 return false;
+//             }
+//         }
+//         return true;
+//     }
+
+//     private void SelectObject()
+//     {
+//         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+//         RaycastHit hit;
+
+//         if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("PlaceableObject"))
+//         {
+//             Selected = hit.collider.gameObject;
+//             objectToPlace = Selected.GetComponent<PlaceableObject>();
+//             Debug.Log(Selected);
+//             Selected.AddComponent<ObjectDrag>();
+//             Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+//             UnfillArea(start, objectToPlace.Size);
+//             highlightButtons();
+//         }
+//     }
+
+//     public void TakeArea(Vector3Int start, Vector3Int size)
+//     {
+//         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+//     }
+
+//     public void UnfillArea(Vector3Int start, Vector3Int size)
+//     {
+//         MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
+//     }
+
+//     public void changeSize(size s)
+//     {
+//         GameObject obj = Selected;
+//         switch (s)
+//         {
+//             case size.small:
+//                 obj.transform.localScale = new Vector3(1f, 1f, 1f);
+//                 break;
+//             case size.medium:
+//                 obj.transform.localScale = new Vector3(3f, 3f, 3f);
+//                 break;
+//             case size.large:
+//                 obj.transform.localScale = new Vector3(5f, 5f, 5f);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+
+   
+// }
+// #endregion
+// #endregion 
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,29 +333,44 @@ using UnityEngine.UIElements;
 public class BuildingSystem : MonoBehaviour
 {
     public static BuildingSystem current;
-
     public GridLayout gridLayout;
-    private Grid grid;
+    public Grid grid;
     [SerializeField] private Tilemap MainTilemap;
     [SerializeField] private TileBase whiteTile;
 
+    // Prefabs & Objects
     public GameObject prefab1;
     public GameObject prefab2;
+    public GameObject Selected;
 
-    public GameObject Selected; // Line added by Bryan
+    // Input Settings
     private float doubleClickTime = 0.3f;
     private float lastClickTime = 0f;
 
-
-    public enum size { small, medium, large}
+    // Scaling Objects
+    public enum size { small, medium, large }
     public UnityEngine.UI.Slider scaleSlider;
-
     size currentSize = size.small;
 
-
     private PlaceableObject objectToPlace;
+    public static int ObjectCount = 0;
 
     #region Unity Methods
+
+    // UI References
+    [SerializeField] public GameObject content;
+    [SerializeField] private GameObject objectPlacement;
+    [SerializeField] private GameObject objectScale;
+    [SerializeField] private GameObject saveLoad;
+    [SerializeField] private GameObject homeBtn;
+    [SerializeField] private GameObject trashBtn;
+    Color defaultColor;
+
+    // PlacementSystem Fields
+    [SerializeField] private GameObject mouseIndicator;
+    [SerializeField] private InputManager inputManager;
+    [SerializeField] private GameObject gridVisualization;
+    [SerializeField] private GameObject SelectionBox;
 
     private void Awake()
     {
@@ -41,59 +378,105 @@ public class BuildingSystem : MonoBehaviour
         grid = gridLayout.gameObject.GetComponent<Grid>();
     }
 
+    private void Start()
+    {
+        Transform transformBtn = content.transform.GetChild(0);
+        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
+        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
+
+        unhighlightButtons();
+
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Z))
+            RotateSelected();
+
         if (Input.GetMouseButtonDown(0))
         {
-            if (Time.time - lastClickTime < doubleClickTime)
+            if (IsDoubleClick())
             {
-                SelectObject();
+                if (objectToPlace != null && !objectToPlace.Placed && CanBePlaced(objectToPlace))
+                {
+                    objectToPlace.Place();
+                    Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                    TakeArea(start, objectToPlace.Size);
+                    objectToPlace = null;
+                    Selected = null;
+                    unhighlightButtons();
+                }
             }
-            lastClickTime = Time.time;
+            else
+            {
+                // Only select when no unplaced object is being dragged
+                if (objectToPlace == null || objectToPlace.Placed)
+                    SelectObject();
+            }
         }
-
 
         if (scaleSlider != null && objectToPlace != null)
         {
             scaleSlider.value = objectToPlace.transform.localScale.x;
             scaleSlider.onValueChanged.AddListener(UpdateScale);
         }
+            // Space — place active object
+    if (Input.GetKeyDown(KeyCode.Space))
+    {
+        if (objectToPlace != null && !objectToPlace.Placed && CanBePlaced(objectToPlace))
+        {
+            objectToPlace.Place();
+            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            TakeArea(start, objectToPlace.Size);
+            objectToPlace = null;
+            Selected = null;
+            unhighlightButtons();
+        }
+    }
 
-        if (!objectToPlace)
+    if (Input.GetKeyDown(KeyCode.Z))
+        objectToPlace?.Rotate();
+
+    if (Input.GetKeyDown(KeyCode.Escape))
+    {
+        if (Selected != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
+
+            PlaceableObject po = Selected.GetComponent<PlaceableObject>();
+            if (po != null)
+            {
+                Vector3Int start = gridLayout.WorldToCell(po.GetStartPosition());
+                UnfillArea(start, po.Size);
+            }
+
+            ObjectDrag drag = Selected.GetComponent<ObjectDrag>();
+            if (drag != null) DestroyImmediate(drag);
+
+            Destroy(Selected);
+            Selected = null;
+            objectToPlace = null;
+            unhighlightButtons();
+        }
+    }
+        if (objectToPlace == null || objectToPlace.Placed)
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Z))
+        Vector3 mousePosition = inputManager.GetSelectedMapPosition();
+        Vector3Int gridPosition = grid.WorldToCell(mousePosition);
+
+        if (mouseIndicator != null)
         {
-            currentSize = (size)(((int)currentSize + 1) % Enum.GetValues(typeof(size)).Length);
-            changeSize(currentSize);
+            mouseIndicator.transform.position = grid.GetCellCenterWorld(gridPosition);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (CanBePlaced(objectToPlace))
-            {
-                objectToPlace.Place();
-                Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
-                TakeArea(start, objectToPlace.Size);
-            }
-            else
-            {
-                Destroy(objectToPlace.gameObject);
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Destroy(objectToPlace.gameObject);
-        }
-    }
+}
 
-        #endregion
+    #region Utils
 
-        #region Utils
-
-        public static Vector3 GetMouseWorldPosition()
+    public static Vector3 GetMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
@@ -106,7 +489,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    public Vector3 SnapCoordinationToGrid (Vector3 position)
+    public Vector3 SnapCoordinationToGrid(Vector3 position)
     {
         Vector3Int cellPos = gridLayout.WorldToCell(position);
         position = grid.GetCellCenterWorld(cellPos);
@@ -124,32 +507,52 @@ public class BuildingSystem : MonoBehaviour
         TileBase[] array = new TileBase[area.size.x * area.size.y * area.size.z];
         int counter = 0;
 
-        foreach (var v in area.allPositionsWithin) {
-            Vector3Int pos = new Vector3Int(v.x, v.y, z:0);
+        foreach (var v in area.allPositionsWithin)
+        {
+            Vector3Int pos = new Vector3Int(v.x, v.y, z: 0);
 
             array[counter] = tilemap.GetTile(pos);
             counter++;
         }
 
         return array;
-        
     }
 
-    #endregion
+    private bool IsDoubleClick()
+    {
+        bool isDouble = Time.time - lastClickTime < doubleClickTime;
+        lastClickTime = Time.time;
+        return isDouble;
+    }
+
+    #endregion // Utils
 
     #region Building Placement
-    // Lines added by Bryan
+
     public void RotateSelected()
     {
         if (Selected) objectToPlace.Rotate();
+    }
+
+    public void ClearObjectToPlace()
+    {
+        objectToPlace = null;
+        Selected = null;
+        unhighlightButtons();
     }
 
     public void DestroySelected()
     {
         if (Selected)
         {
+            if (objectToPlace != null && objectToPlace.Placed)
+            {
+                Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+                UnfillArea(start, objectToPlace.Size);
+            }
             Destroy(objectToPlace.gameObject);
             Selected = null;
+            objectToPlace = null;
             unhighlightButtons();
         }
     }
@@ -169,14 +572,6 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    [SerializeField] public GameObject content;
-    [SerializeField] private GameObject objectPlacement;
-    [SerializeField] private GameObject objectScale;
-    [SerializeField] private GameObject saveLoad;
-    [SerializeField] private GameObject homeBtn;
-    [SerializeField] private GameObject trashBtn;
-    Color defaultColor;
-
     private void unhighlightButtons()
     {
         objectPlacement.SetActive(false);
@@ -190,7 +585,9 @@ public class BuildingSystem : MonoBehaviour
             if (btn != null)
                 btn.GetComponent<UnityEngine.UI.Image>().color = defaultColor;
         }
+        PlaceableObject.UpdateAllObjectColors();
     }
+
     private void highlightButtons()
     {
         objectPlacement.SetActive(true);
@@ -206,27 +603,31 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        Transform transformBtn = content.transform.GetChild(0);
-        UnityEngine.UI.Button btn = transformBtn.GetComponent<UnityEngine.UI.Button>();
-        defaultColor = btn.GetComponent<UnityEngine.UI.Image>().color;
-
-        unhighlightButtons();
-    }
-
     public void InitializeWithObject(GameObject prefab)
     {
         Vector3 position = SnapCoordinationToGrid(Vector3.zero);
 
         GameObject obj = Instantiate(prefab, position, Quaternion.identity);
+        obj.name = prefab.name + " #" + ObjectCount++;
+
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            position.y += renderer.bounds.extents.y;
+        }
+        obj.transform.position = position;
+
         objectToPlace = obj.GetComponent<PlaceableObject>();
         obj.AddComponent<ObjectDrag>();
 
-        // Lines added by Bryan
         Selected = obj;
+
+        if (objectToPlace != null)
+            objectToPlace.SetColor(new Color(0, 1, 0, 0.5f)); 
+
         unhighlightButtons();
     }
+
     private bool CanBePlaced(PlaceableObject placeableObject)
     {
         BoundsInt area = new BoundsInt();
@@ -244,29 +645,58 @@ public class BuildingSystem : MonoBehaviour
         }
         return true;
     }
+
     private void SelectObject()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit) && hit.collider != null && hit.collider.gameObject.CompareTag("Selectable"))
+        if (!Physics.Raycast(ray, out hit))
         {
-            Selected = hit.collider.gameObject;
-            objectToPlace = Selected.GetComponent<PlaceableObject>();
-            Debug.Log(Selected);
-            Selected.AddComponent<ObjectDrag>();
-            Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
-            UnfillArea(start, objectToPlace.Size);
-            highlightButtons();
+            Debug.Log("SelectObject: raycast hit nothing");
+            return;
         }
 
+        Debug.Log("SelectObject: hit " + hit.collider.gameObject.name + " tag=" + hit.collider.gameObject.tag);
 
+        if (!hit.collider.gameObject.CompareTag("Selectable"))
+        {
+            Debug.Log("SelectObject: tag is not Selectable, skipping");
+            return;
+        }
+
+        // If clicking the already-selected object, do nothing
+        if (hit.collider.gameObject == Selected) return;
+
+        // Re-fill tilemap for previously selected object before switching
+        if (Selected != null && objectToPlace != null && objectToPlace.Placed)
+        {
+            ObjectDrag oldDrag = Selected.GetComponent<ObjectDrag>();
+            if (oldDrag != null) DestroyImmediate(oldDrag);
+            Vector3Int oldStart = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+            TakeArea(oldStart, objectToPlace.Size);
+        }
+
+        Selected = hit.collider.gameObject;
+        objectToPlace = Selected.GetComponent<PlaceableObject>();
+        Debug.Log("SelectObject: selected " + Selected.name);
+
+        // DestroyImmediate so old ObjectDrag is gone before adding new one
+        ObjectDrag existing = Selected.GetComponent<ObjectDrag>();
+        if (existing != null) DestroyImmediate(existing);
+        Selected.AddComponent<ObjectDrag>();
+
+        Vector3Int start = gridLayout.WorldToCell(objectToPlace.GetStartPosition());
+        UnfillArea(start, objectToPlace.Size);
+        highlightButtons();
+        PlaceableObject.UpdateAllObjectColors();
     }
 
     public void TakeArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, whiteTile, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
     }
+
     public void UnfillArea(Vector3Int start, Vector3Int size)
     {
         MainTilemap.BoxFill(start, null, startX: start.x, startY: start.y, endX: start.x + size.x, endY: start.y + size.y);
@@ -291,5 +721,7 @@ public class BuildingSystem : MonoBehaviour
         }
     }
 
-    #endregion
+   
 }
+#endregion
+#endregion
